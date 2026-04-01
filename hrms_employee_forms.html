@@ -1,0 +1,600 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif}
+.app{background:#07111f;min-height:600px;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+
+/* TOP NAV */
+.topnav{background:#0b1d38;display:flex;align-items:center;padding:0 16px;height:44px;border-bottom:1px solid #162f55;gap:8px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:2px;color:#fff;text-transform:uppercase}
+.logo-box{width:24px;height:24px;background:#1a9f7c;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.spacer{flex:1}
+.nbtn{width:26px;height:26px;border-radius:5px;background:rgba(255,255,255,.07);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#7aaacf}
+.prof{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border-radius:20px;padding:2px 8px 2px 3px;border:1px solid rgba(255,255,255,.1)}
+.ava{width:20px;height:20px;border-radius:50%;background:#1a6fbf;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff}
+.pname{font-size:10px;color:#a0c0de}
+
+/* LAYOUT */
+.body{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:200px;background:#0a1828;border-right:1px solid #142540;flex-shrink:0;padding:14px 0}
+.sb-head{padding:0 14px 10px;font-size:9px;font-weight:700;color:#2e5a80;letter-spacing:1.5px;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;transition:background .15s;position:relative;border-left:3px solid transparent}
+.sb-item:hover{background:rgba(26,159,124,.08)}
+.sb-item.active{background:rgba(26,159,124,.12);border-left-color:#1a9f7c}
+.sb-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.08);color:#5a89b8;transition:background .15s,color .15s}
+.sb-item.active .sb-num{background:#1a9f7c;color:#fff}
+.sb-item.done .sb-num{background:#0d6e56;color:#2ec99a}
+.sb-label{font-size:11px;color:#6a90b0;font-weight:500;transition:color .15s}
+.sb-item.active .sb-label{color:#d0eeff;font-weight:600}
+.sb-item.done .sb-label{color:#2ec99a}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:#1a9f7c;margin-left:auto;opacity:0}
+.sb-item.active .sb-dot,.sb-item.done .sb-dot{opacity:1}
+.sb-sep{height:1px;background:#142540;margin:10px 14px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:20px 24px}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-track{background:#07111f}
+.main::-webkit-scrollbar-thumb{background:#1a3560;border-radius:2px}
+
+/* FORM SECTIONS */
+.sec{display:none}
+.sec.show{display:block}
+
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #142540}
+.sec-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-title{font-size:15px;font-weight:700;color:#d8eeff}
+.sec-sub{font-size:10.5px;color:#3a6080;margin-top:2px}
+.sec-badge{margin-left:auto;padding:3px 9px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.5px}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.full{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.span2{grid-column:span 2}
+label{font-size:10.5px;font-weight:600;color:#5a7fa0;letter-spacing:.4px;text-transform:uppercase}
+.inp{width:100%;height:38px;background:#0d1e36;border:1px solid #1a3560;border-radius:8px;padding:0 12px;font-size:12px;color:#c8dff4;font-family:inherit;outline:none;transition:border-color .2s,background .2s}
+.inp:focus{border-color:#1a9f7c;background:#0e2040}
+.inp::placeholder{color:#2a4565}
+select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%232a4565' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+textarea.inp{height:72px;padding:10px 12px;resize:none;line-height:1.5}
+
+/* RADIO TOGGLE */
+.radio-row{display:flex;gap:10px;align-items:center;margin:2px 0 4px}
+.rtog{display:flex;align-items:center;gap:7px;background:#0d1e36;border:1px solid #1a3560;border-radius:8px;padding:8px 14px;cursor:pointer;transition:border-color .2s,background .2s;flex:1}
+.rtog input[type=radio]{accent-color:#1a9f7c;width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.rtog-label{font-size:12px;color:#7aaacf;font-weight:500}
+.rtog.sel-yes{border-color:#1a9f7c;background:rgba(26,159,124,.1)}
+.rtog.sel-yes .rtog-label{color:#2ec99a}
+.rtog.sel-no{border-color:#d85050;background:rgba(216,80,80,.08)}
+.rtog.sel-no .rtog-label{color:#e08080}
+
+.cond-block{margin-top:14px;padding:14px;background:#0a1a30;border-radius:10px;border:1px solid #182e50;display:none}
+.cond-block.visible{display:block}
+.cond-title{font-size:9.5px;font-weight:700;color:#2e5a80;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #142540}
+
+/* PHOTO UPLOAD */
+.upload-zone{border:2px dashed #1a3560;border-radius:12px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:border-color .2s,background .2s;background:#0d1e36;text-align:center}
+.upload-zone:hover{border-color:#1a9f7c;background:rgba(26,159,124,.05)}
+.upload-icon{width:52px;height:52px;border-radius:50%;background:rgba(26,159,124,.12);border:1px solid rgba(26,159,124,.25);display:flex;align-items:center;justify-content:center}
+.upload-title{font-size:13px;font-weight:600;color:#a0c8e8}
+.upload-sub{font-size:10.5px;color:#2a4565}
+.upload-btn{background:#1a9f7c;color:#fff;border:none;border-radius:7px;padding:7px 18px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px}
+.preview-wrap{display:none;flex-direction:column;align-items:center;gap:10px;margin-top:14px}
+.preview-wrap.show{display:flex}
+.preview-img{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #1a9f7c}
+.preview-name{font-size:11px;color:#5a89b8}
+.remove-btn{background:rgba(216,80,80,.15);color:#e08080;border:1px solid rgba(216,80,80,.3);border-radius:6px;padding:4px 12px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* NAV BUTTONS */
+.form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:22px;padding-top:16px;border-top:1px solid #142540}
+.btn-back{background:transparent;border:1px solid #1a3560;color:#5a89b8;border-radius:8px;padding:8px 18px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .2s,color .2s}
+.btn-back:hover{border-color:#2a5090;color:#90b8d8}
+.btn-next{background:#1a9f7c;border:none;color:#fff;border-radius:8px;padding:8px 22px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .2s}
+.btn-next:hover{background:#15876a}
+.btn-save{background:#2a80d4;border:none;color:#fff;border-radius:8px;padding:8px 22px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.step-pill{font-size:10px;color:#2e5a80}
+.step-pill b{color:#1a9f7c}
+
+/* PROGRESS BAR */
+.prog-bar{height:3px;background:#142540;flex-shrink:0}
+.prog-fill{height:100%;background:#1a9f7c;transition:width .4s ease;border-radius:0 2px 2px 0}
+
+/* TOAST */
+.toast{position:absolute;bottom:14px;right:18px;background:#1a9f7c;color:#fff;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+
+<div class="app" style="position:relative">
+
+  <div class="topnav">
+    <div class="logo">
+      <div class="logo-box"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2" fill="white" opacity=".95"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2" fill="white" opacity=".6"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2" fill="white" opacity=".6"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2" fill="white" opacity=".95"/></svg></div>
+      Workline
+    </div>
+    <div class="spacer"></div>
+    <div style="font-size:10px;color:#3a6080;margin-right:12px">Employee Management › <span style="color:#5a89b8">New Employee</span></div>
+    <div class="prof"><div class="ava">AR</div><div class="pname">Admin</div></div>
+  </div>
+
+  <div class="prog-bar"><div class="prog-fill" id="prog" style="width:20%"></div></div>
+
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-head">Sections</div>
+
+      <div class="sb-item active" id="sb0" onclick="goTo(0)">
+        <div class="sb-num">1</div>
+        <div class="sb-label">Personal Info</div>
+        <div class="sb-dot"></div>
+      </div>
+      <div class="sb-item" id="sb1" onclick="goTo(1)">
+        <div class="sb-num">2</div>
+        <div class="sb-label">Photo Upload</div>
+        <div class="sb-dot"></div>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-item" id="sb2" onclick="goTo(2)">
+        <div class="sb-num">3</div>
+        <div class="sb-label">Passport</div>
+        <div class="sb-dot"></div>
+      </div>
+      <div class="sb-item" id="sb3" onclick="goTo(3)">
+        <div class="sb-num">4</div>
+        <div class="sb-label">Driving License</div>
+        <div class="sb-dot"></div>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-item" id="sb4" onclick="goTo(4)">
+        <div class="sb-num">5</div>
+        <div class="sb-label">Work Info</div>
+        <div class="sb-dot"></div>
+      </div>
+
+      <div style="padding:14px;margin-top:auto">
+        <div style="background:#0d1e36;border-radius:8px;padding:10px 12px;border:1px solid #142540">
+          <div style="font-size:9px;color:#2e5a80;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Progress</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:18px;font-weight:700;color:#1a9f7c" id="pct">20%</div>
+            <div style="font-size:9px;color:#2e5a80" id="pctlabel">1 of 5</div>
+          </div>
+          <div style="height:4px;background:#142540;border-radius:2px;margin-top:8px;overflow:hidden">
+            <div id="sidebar-prog" style="height:100%;background:#1a9f7c;width:20%;border-radius:2px;transition:width .4s"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main" id="mainscroll">
+
+      <!-- SECTION 1: Personal Info -->
+      <div class="sec show" id="sec0">
+        <div class="sec-header">
+          <div class="sec-icon" style="background:rgba(26,159,124,.15);border:1px solid rgba(26,159,124,.25)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#1a9f7c" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#1a9f7c" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="sec-title">Personal Information</div>
+            <div class="sec-sub">Basic details about the employee</div>
+          </div>
+          <div class="sec-badge" style="background:rgba(26,159,124,.15);color:#2ec99a;border:1px solid rgba(26,159,124,.25)">REQUIRED</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Full Name</label>
+            <input class="inp" type="text" placeholder="e.g. Arjun Ramesh">
+          </div>
+          <div class="field">
+            <label>Email Address</label>
+            <input class="inp" type="email" placeholder="e.g. arjun@company.com">
+          </div>
+          <div class="field">
+            <label>Phone Number</label>
+            <input class="inp" type="tel" placeholder="e.g. +91 98765 43210">
+          </div>
+          <div class="field">
+            <label>Date of Birth</label>
+            <input class="inp" type="date">
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select class="inp">
+              <option value="" disabled selected>Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Non-binary</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>City</label>
+            <input class="inp" type="text" placeholder="e.g. Chennai">
+          </div>
+          <div class="field span2">
+            <label>Full Address</label>
+            <textarea class="inp" placeholder="Door No, Street, Area, City, State, PIN"></textarea>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <div class="step-pill">Step <b>1</b> of 5</div>
+          <button class="btn-next" onclick="goTo(1)">Next &nbsp;›</button>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Photo Upload -->
+      <div class="sec" id="sec1">
+        <div class="sec-header">
+          <div class="sec-icon" style="background:rgba(42,128,212,.15);border:1px solid rgba(42,128,212,.25)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="#2a80d4" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="#2a80d4" stroke-width="1.6"/><path d="M9.5 5l1.2-2h2.6L14.5 5" stroke="#2a80d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="sec-title">Photo Upload</div>
+            <div class="sec-sub">Upload employee profile photograph</div>
+          </div>
+          <div class="sec-badge" style="background:rgba(42,128,212,.15);color:#5ab0f5;border:1px solid rgba(42,128,212,.25)">PROFILE</div>
+        </div>
+
+        <div style="max-width:420px;margin:0 auto">
+          <div class="upload-zone" id="dropzone" onclick="document.getElementById('fileinput').click()" ondragover="event.preventDefault();this.style.borderColor='#1a9f7c'" ondragleave="this.style.borderColor='#1a3560'" ondrop="handleDrop(event)">
+            <div class="upload-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 16V8M12 8l-3 3M12 8l3 3" stroke="#1a9f7c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="#1a9f7c" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div class="upload-title">Click or drag photo here</div>
+            <div class="upload-sub">Supports JPG, PNG, WEBP · Max 5 MB</div>
+            <button class="upload-btn" onclick="event.stopPropagation();document.getElementById('fileinput').click()">Choose File</button>
+          </div>
+          <input type="file" id="fileinput" accept="image/*" style="display:none" onchange="handleFile(this)">
+
+          <div class="preview-wrap" id="preview">
+            <img id="previewimg" class="preview-img" src="" alt="Preview">
+            <div class="preview-name" id="previewname"></div>
+            <button class="remove-btn" onclick="removePhoto()">Remove Photo</button>
+          </div>
+
+          <div style="margin-top:18px;background:#0a1a30;border-radius:10px;padding:12px 14px;border:1px solid #142540">
+            <div style="font-size:9.5px;font-weight:700;color:#2e5a80;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Photo Guidelines</div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#4a7090"><span style="width:16px;height:16px;border-radius:50%;background:rgba(26,159,124,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#1a9f7c" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span>Clear face, front-facing photograph</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#4a7090"><span style="width:16px;height:16px;border-radius:50%;background:rgba(26,159,124,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#1a9f7c" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span>Plain white or light background preferred</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#4a7090"><span style="width:16px;height:16px;border-radius:50%;background:rgba(26,159,124,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#1a9f7c" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span>Minimum 200×200 px resolution</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-back" onclick="goTo(0)">‹ &nbsp;Back</button>
+          <div class="step-pill">Step <b>2</b> of 5</div>
+          <button class="btn-next" onclick="goTo(2)">Next &nbsp;›</button>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Passport -->
+      <div class="sec" id="sec2">
+        <div class="sec-header">
+          <div class="sec-icon" style="background:rgba(139,110,232,.15);border:1px solid rgba(139,110,232,.25)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" stroke="#8b6ee8" stroke-width="1.8"/><circle cx="12" cy="10" r="3" stroke="#8b6ee8" stroke-width="1.6"/><path d="M7 16h10M7 18.5h5" stroke="#8b6ee8" stroke-width="1.4" stroke-linecap="round"/><path d="M4 7h16" stroke="#a08cf0" stroke-width="1" stroke-dasharray="2 2"/></svg>
+          </div>
+          <div>
+            <div class="sec-title">Passport Details</div>
+            <div class="sec-sub">International travel document information</div>
+          </div>
+          <div class="sec-badge" style="background:rgba(139,110,232,.15);color:#b09cf8;border:1px solid rgba(139,110,232,.25)">KYC</div>
+        </div>
+
+        <div style="background:#0a1a30;border-radius:10px;padding:14px;border:1px solid #142540;margin-bottom:14px">
+          <label style="display:block;margin-bottom:8px">Does the employee have a Passport?</label>
+          <div class="radio-row">
+            <label class="rtog" id="ptog-yes" onclick="setRadio('passport','yes')">
+              <input type="radio" name="passport" value="yes">
+              <span class="rtog-label">Yes, has a passport</span>
+            </label>
+            <label class="rtog" id="ptog-no" onclick="setRadio('passport','no')">
+              <input type="radio" name="passport" value="no">
+              <span class="rtog-label">No passport</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cond-block" id="passport-block">
+          <div class="cond-title">Passport Information</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Passport Number</label>
+              <input class="inp" type="text" placeholder="e.g. N1234567">
+            </div>
+            <div class="field">
+              <label>Person Name (as on passport)</label>
+              <input class="inp" type="text" placeholder="e.g. ARJUN RAMESH">
+            </div>
+            <div class="field">
+              <label>Issued On</label>
+              <input class="inp" type="date">
+            </div>
+            <div class="field">
+              <label>Expiry Date</label>
+              <input class="inp" type="date">
+            </div>
+            <div class="field">
+              <label>Issuing Country</label>
+              <select class="inp">
+                <option value="" disabled selected>Select country</option>
+                <option>India</option>
+                <option>United States</option>
+                <option>United Kingdom</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Nationality</label>
+              <input class="inp" type="text" placeholder="e.g. Indian">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-back" onclick="goTo(1)">‹ &nbsp;Back</button>
+          <div class="step-pill">Step <b>3</b> of 5</div>
+          <button class="btn-next" onclick="goTo(3)">Next &nbsp;›</button>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Driving License -->
+      <div class="sec" id="sec3">
+        <div class="sec-header">
+          <div class="sec-icon" style="background:rgba(217,142,32,.15);border:1px solid rgba(217,142,32,.25)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="13" rx="3" stroke="#d98e20" stroke-width="1.8"/><circle cx="7.5" cy="12.5" r="2.5" stroke="#d98e20" stroke-width="1.5"/><path d="M12 9.5h6M12 12.5h6M12 15.5h4" stroke="#d98e20" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="sec-title">Driving License</div>
+            <div class="sec-sub">Vehicle driving authorization details</div>
+          </div>
+          <div class="sec-badge" style="background:rgba(217,142,32,.15);color:#e8b050;border:1px solid rgba(217,142,32,.25)">OPTIONAL</div>
+        </div>
+
+        <div style="background:#0a1a30;border-radius:10px;padding:14px;border:1px solid #142540;margin-bottom:14px">
+          <label style="display:block;margin-bottom:8px">Does the employee hold a Driving License?</label>
+          <div class="radio-row">
+            <label class="rtog" id="dltog-yes" onclick="setRadio('dl','yes')">
+              <input type="radio" name="dl" value="yes">
+              <span class="rtog-label">Yes, has a license</span>
+            </label>
+            <label class="rtog" id="dltog-no" onclick="setRadio('dl','no')">
+              <input type="radio" name="dl" value="no">
+              <span class="rtog-label">No license</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cond-block" id="dl-block">
+          <div class="cond-title">License Information</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>License Number</label>
+              <input class="inp" type="text" placeholder="e.g. TN0120230012345">
+            </div>
+            <div class="field">
+              <label>License Type / Class</label>
+              <select class="inp">
+                <option value="" disabled selected>Select type</option>
+                <option>LMV – Light Motor Vehicle</option>
+                <option>HMV – Heavy Motor Vehicle</option>
+                <option>MCWG – Motorcycle with Gear</option>
+                <option>MCWOG – Motorcycle without Gear</option>
+                <option>Transport Vehicle</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Issue Date</label>
+              <input class="inp" type="date">
+            </div>
+            <div class="field">
+              <label>Valid Until</label>
+              <input class="inp" type="date">
+            </div>
+            <div class="field span2">
+              <label>Issuing RTO / Authority</label>
+              <input class="inp" type="text" placeholder="e.g. RTO Chennai Central – TN01">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-back" onclick="goTo(2)">‹ &nbsp;Back</button>
+          <div class="step-pill">Step <b>4</b> of 5</div>
+          <button class="btn-next" onclick="goTo(4)">Next &nbsp;›</button>
+        </div>
+      </div>
+
+      <!-- SECTION 5: Work Info -->
+      <div class="sec" id="sec4">
+        <div class="sec-header">
+          <div class="sec-icon" style="background:rgba(216,80,80,.15);border:1px solid rgba(216,80,80,.25)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="14" rx="3" stroke="#d85050" stroke-width="1.8"/><path d="M8 7V5a2 2 0 014 0v2M12 7V5a2 2 0 014 0v2" stroke="#d85050" stroke-width="1.5" stroke-linecap="round"/><path d="M7 13h10M7 16.5h6" stroke="#d85050" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="sec-title">Work Information</div>
+            <div class="sec-sub">Employment and work schedule details</div>
+          </div>
+          <div class="sec-badge" style="background:rgba(216,80,80,.15);color:#e88080;border:1px solid rgba(216,80,80,.25)">HR</div>
+        </div>
+
+        <div style="background:#0a1a30;border-radius:10px;padding:14px;border:1px solid #142540;margin-bottom:14px">
+          <label style="display:block;margin-bottom:8px">Is this employee currently employed?</label>
+          <div class="radio-row">
+            <label class="rtog" id="witog-yes" onclick="setRadio('wi','yes')">
+              <input type="radio" name="wi" value="yes">
+              <span class="rtog-label">Yes, currently employed</span>
+            </label>
+            <label class="rtog" id="witog-no" onclick="setRadio('wi','no')">
+              <input type="radio" name="wi" value="no">
+              <span class="rtog-label">No / Not yet joined</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cond-block" id="wi-block">
+          <div class="cond-title">Employment Details</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Current Employee Status</label>
+              <select class="inp">
+                <option value="" disabled selected>Select status</option>
+                <option>Full-Time Permanent</option>
+                <option>Full-Time Contract</option>
+                <option>Part-Time</option>
+                <option>Probation</option>
+                <option>Intern</option>
+                <option>On Notice Period</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Department</label>
+              <select class="inp">
+                <option value="" disabled selected>Select department</option>
+                <option>Engineering</option>
+                <option>Human Resources</option>
+                <option>Finance</option>
+                <option>Operations</option>
+                <option>Sales &amp; Marketing</option>
+                <option>Administration</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Work Location</label>
+              <select class="inp">
+                <option value="" disabled selected>Select location</option>
+                <option>Head Office – Chennai</option>
+                <option>Branch – Bangalore</option>
+                <option>Branch – Mumbai</option>
+                <option>Remote</option>
+                <option>Hybrid</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Shift Time</label>
+              <select class="inp">
+                <option value="" disabled selected>Select shift</option>
+                <option>Morning – 6:00 AM to 2:00 PM</option>
+                <option>General – 9:00 AM to 6:00 PM</option>
+                <option>Afternoon – 2:00 PM to 10:00 PM</option>
+                <option>Night – 10:00 PM to 6:00 AM</option>
+                <option>Flexible</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Date of Joining</label>
+              <input class="inp" type="date">
+            </div>
+            <div class="field">
+              <label>Reporting Manager</label>
+              <input class="inp" type="text" placeholder="e.g. Priya Suresh">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-back" onclick="goTo(3)">‹ &nbsp;Back</button>
+          <div class="step-pill">Step <b>5</b> of 5</div>
+          <button class="btn-save" onclick="saveAll()">Save Employee ✓</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Employee record saved successfully!</div>
+</div>
+
+<script>
+var cur=0;
+var done=[];
+
+function goTo(n){
+  document.getElementById('sec'+cur).classList.remove('show');
+  document.getElementById('sb'+cur).classList.remove('active');
+  if(!done.includes(cur)) done.push(cur);
+  document.getElementById('sb'+cur).classList.add('done');
+
+  cur=n;
+  document.getElementById('sec'+cur).classList.add('show');
+  document.getElementById('sb'+cur).classList.remove('done');
+  document.getElementById('sb'+cur).classList.add('active');
+
+  var pct=Math.round((cur+1)/5*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('sidebar-prog').style.width=pct+'%';
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pctlabel').textContent=(cur+1)+' of 5';
+  document.getElementById('mainscroll').scrollTop=0;
+}
+
+function setRadio(group,val){
+  var yesId=group==='passport'?'ptog-yes':group==='dl'?'dltog-yes':'witog-yes';
+  var noId=group==='passport'?'ptog-no':group==='dl'?'dltog-no':'witog-no';
+  var blockId=group==='passport'?'passport-block':group==='dl'?'dl-block':'wi-block';
+
+  document.getElementById(yesId).classList.remove('sel-yes','sel-no');
+  document.getElementById(noId).classList.remove('sel-yes','sel-no');
+
+  if(val==='yes'){
+    document.getElementById(yesId).classList.add('sel-yes');
+    document.getElementById(blockId).classList.add('visible');
+  } else {
+    document.getElementById(noId).classList.add('sel-no');
+    document.getElementById(blockId).classList.remove('visible');
+  }
+
+  var radios=document.querySelectorAll('input[name="'+group+'"]');
+  radios.forEach(function(r){if(r.value===val)r.checked=true;});
+}
+
+function handleFile(inp){
+  if(!inp.files||!inp.files[0])return;
+  var f=inp.files[0];
+  var r=new FileReader();
+  r.onload=function(e){
+    document.getElementById('previewimg').src=e.target.result;
+    document.getElementById('previewname').textContent=f.name+' · '+Math.round(f.size/1024)+' KB';
+    document.getElementById('preview').classList.add('show');
+    document.getElementById('dropzone').style.borderColor='#1a9f7c';
+  };
+  r.readAsDataURL(f);
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  var files=e.dataTransfer.files;
+  if(files&&files[0]){
+    document.getElementById('fileinput').files=files;
+    handleFile(document.getElementById('fileinput'));
+  }
+}
+
+function removePhoto(){
+  document.getElementById('fileinput').value='';
+  document.getElementById('preview').classList.remove('show');
+  document.getElementById('dropzone').style.borderColor='#1a3560';
+}
+
+function saveAll(){
+  var t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+  done=[0,1,2,3,4];
+  for(var i=0;i<5;i++){
+    document.getElementById('sb'+i).classList.add('done');
+  }
+  document.getElementById('sb4').classList.add('active');
+  document.getElementById('prog').style.width='100%';
+  document.getElementById('sidebar-prog').style.width='100%';
+  document.getElementById('pct').textContent='100%';
+  document.getElementById('pctlabel').textContent='5 of 5';
+}
+</script>
