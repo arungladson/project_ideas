@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NexusHRMS — Employee Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CSS — All styles in one <style> block
+═══════════════════════════════════════════════════════════ -->
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --bg:#f0f2f8;
+  --surface:#ffffff;
+  --surface2:#f8f9fc;
+  --border:#e4e8f0;
+  --border2:#d0d6e8;
+
+  --ink:#0e1726;
+  --ink2:#3b4b6b;
+  --ink3:#6b7a99;
+  --ink4:#9aa3bc;
+
+  --brand:#2563eb;
+  --brand2:#1d4ed8;
+  --brand3:#dbeafe;
+  --brand4:#eff6ff;
+  --brand-glow:rgba(37,99,235,.15);
+
+  --violet:#7c3aed;
+  --teal:#0891b2;
+  --rose:#e11d48;
+  --amber:#d97706;
+  --emerald:#059669;
+
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --danger-lt:#fef2f2;
+
+  --h:68px;               /* header height */
+  --sidebar:64px;         /* collapsed sidebar */
+  --sidebar-open:240px;
+  --r:12px;               /* radius */
+  --r2:8px;
+  --sh:0 2px 10px rgba(0,0,0,.06);
+  --sh2:0 8px 32px rgba(0,0,0,.10);
+  --sh3:0 24px 64px rgba(0,0,0,.14);
+
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.6}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink4)}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  height:var(--h);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--sh);
+  display:flex;align-items:center;
+  padding:0 1.5rem;gap:1rem;
+}
+
+.hdr-brand{display:flex;align-items:center;gap:.75rem;flex-shrink:0;margin-right:auto}
+.hdr-logo{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--brand),var(--violet));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px var(--brand-glow);
+}
+.hdr-logo span{
+  font-family:'Fraunces',serif;font-weight:700;font-size:.85rem;color:#fff;letter-spacing:.01em;
+}
+.hdr-title{display:flex;flex-direction:column}
+.hdr-name{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--ink);line-height:1.1}
+.hdr-name b{color:var(--brand)}
+.hdr-sub{font-size:.65rem;color:var(--ink3);letter-spacing:.04em;text-transform:uppercase}
+
+/* Progress bar in header */
+.hdr-progress{display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:160px}
+.hdr-pct{font-size:.7rem;font-weight:700;color:var(--ink2)}
+.hdr-track{width:140px;height:5px;background:var(--border);border-radius:99px;overflow:hidden}
+.hdr-bar{height:100%;background:linear-gradient(90deg,var(--brand),var(--violet));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* User avatar */
+.hdr-user{display:flex;align-items:center;gap:.55rem;flex-shrink:0}
+.hdr-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--violet));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:800;color:#fff;flex-shrink:0;
+}
+.hdr-uname{font-size:.78rem;font-weight:600;color:var(--ink);line-height:1.2}
+.hdr-uid{font-size:.65rem;color:var(--ink3)}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
+.layout{
+  display:flex;
+  padding-top:var(--h);
+  min-height:100vh;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar-open);
+  flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  position:fixed;
+  top:var(--h);left:0;bottom:0;
+  overflow:hidden;
+  z-index:800;
+  transition:width .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+.sidebar.collapsed{width:var(--sidebar)}
+
+.sb-toggle{
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:flex-end;
+  flex-shrink:0;
+}
+.btn-toggle{
+  width:28px;height:28px;border:1px solid var(--border);border-radius:7px;
+  background:var(--surface2);color:var(--ink3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.78rem;
+  transition:all .2s;flex-shrink:0;
+}
+.btn-toggle:hover{background:var(--brand3);color:var(--brand);border-color:var(--brand)}
+
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:.5rem .5rem}
+.sb-item{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.6rem .75rem;border-radius:var(--r2);
+  cursor:pointer;margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;
+  font-size:.8rem;font-weight:500;color:var(--ink3);
+  transition:all .2s;position:relative;
+}
+.sb-item:hover{background:var(--brand4);color:var(--brand)}
+.sb-item.active{background:var(--brand3);color:var(--brand);font-weight:700}
+.sb-item.active::before{
+  content:'';position:absolute;left:0;top:20%;bottom:20%;
+  width:3px;border-radius:0 3px 3px 0;background:var(--brand);
+}
+.sb-item .sb-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;flex-shrink:0;
+  background:var(--surface2);color:var(--ink4);
+  transition:all .2s;
+}
+.sb-item.active .sb-icon{background:var(--brand);color:#fff;box-shadow:0 3px 10px var(--brand-glow)}
+.sb-item .sb-label{flex:1;font-size:.8rem;transition:opacity .2s}
+.sidebar.collapsed .sb-label{opacity:0;pointer-events:none}
+.sb-check{
+  width:16px;height:16px;border-radius:50%;
+  background:var(--success);color:#fff;
+  font-size:.5rem;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;opacity:0;transition:opacity .2s;
+}
+.sb-check.show{opacity:1}
+.sidebar.collapsed .sb-check{position:absolute;top:4px;right:4px;width:10px;height:10px;font-size:.4rem}
+
+/* Sidebar footer ring */
+.sb-foot{
+  padding:1rem;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;flex-shrink:0;
+}
+.ring-wrap{position:relative;width:52px;height:52px}
+.ring-wrap svg{transform:rotate(-90deg);width:52px;height:52px}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:4}
+.ring-fill{fill:none;stroke:var(--brand);stroke-width:4;stroke-linecap:round;transition:stroke-dasharray .6s cubic-bezier(.4,0,.2,1)}
+.ring-label{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:.62rem;font-weight:800;color:var(--brand);
+}
+.ring-text{font-size:.65rem;color:var(--ink3);font-weight:600;white-space:nowrap}
+.sidebar.collapsed .sb-foot .ring-text{display:none}
+
+/* ── MAIN CONTENT ─────────────────────────────────────────── */
+.main{
+  flex:1;min-width:0;
+  margin-left:var(--sidebar-open);
+  padding:2rem 2rem 4rem;
+  transition:margin-left .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.collapsed ~ .main{margin-left:var(--sidebar)}
+
+/* ── PAGE SECTIONS ─────────────────────────────────────────── */
+.page{display:none;animation:pageIn .3s ease}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* Page header */
+.pg-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem}
+.pg-title-wrap{display:flex;align-items:center;gap:.9rem}
+.pg-icon{
+  width:48px;height:48px;border-radius:13px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;color:#fff;
+  box-shadow:0 6px 20px rgba(0,0,0,.15);
+}
+.pg-title{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;color:var(--ink);line-height:1.2}
+.pg-sub{font-size:.78rem;color:var(--ink3);margin-top:2px}
+
+/* ── INFO BANNER ─────────────────────────────────────────── */
+.info-banner{
+  display:flex;align-items:flex-start;gap:.8rem;
+  border-radius:var(--r2);padding:.85rem 1.1rem;
+  margin-bottom:1.5rem;font-size:.79rem;color:var(--ink2);line-height:1.65;
+}
+.info-banner.blue{background:#eff6ff;border:1px solid #bfdbfe}
+.info-banner.teal{background:#ecfeff;border:1px solid #a5f3fc}
+.info-banner.violet{background:#f5f3ff;border:1px solid #ddd6fe}
+.info-banner .bi-icon{font-size:.95rem;flex-shrink:0;margin-top:2px}
+.info-banner.blue .bi-icon{color:var(--brand)}
+.info-banner.teal .bi-icon{color:var(--teal)}
+.info-banner.violet .bi-icon{color:var(--violet)}
+.req{color:var(--danger);font-weight:700}
+
+/* ── FORM CARD ─────────────────────────────────────────── */
+.fcard{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--sh);
+  overflow:hidden;margin-bottom:1.5rem;
+}
+.fcard-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 1.4rem;border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}
+.fcard-label{
+  font-size:.72rem;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.06em;
+  display:flex;align-items:center;gap:.5rem;
+}
+.fcard-label i{color:var(--brand);font-size:.8rem}
+.btn-reset{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  width:28px;height:28px;color:var(--ink4);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;
+  transition:all .2s;
+}
+.btn-reset:hover{border-color:var(--amber);color:var(--amber);background:#fffbeb}
+
+.fcard-body{padding:0}
+
+/* ── FORM GRID ─────────────────────────────────────────── */
+.fg{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}
+.fg .fc{
+  padding:1.1rem 1.4rem .55rem;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.fg .fc:nth-child(2n){border-right:none}
+.fg .fc.full{grid-column:1/-1;border-right:none}
+/* Remove bottom border from last row */
+.fg .fc:last-child,.fg .fc:nth-last-child(2):nth-child(odd){border-bottom:none}
+.fg .fc.full:last-child{border-bottom:none}
+
+.fl{display:block;font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.55rem}
+
+/* Underline inputs */
+.fi,.fsel,.fta{
+  width:100%;border:none;outline:none;background:transparent;
+  border-bottom:1.5px solid var(--border2);
+  padding:.28rem 0 .42rem;
+  color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.875rem;font-weight:500;
+  transition:border-color .2s;
+  border-radius:0;
+}
+.fi::placeholder{color:var(--ink4);font-weight:400}
+.fi:focus,.fsel:focus,.fta:focus{border-bottom-color:var(--brand)}
+.fi.err,.fsel.err{border-bottom-color:var(--danger)}
+.fi.ok,.fsel.ok{border-bottom-color:var(--success)}
+.fsel{
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239aa3bc' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 2px center;
+  padding-right:1.4rem;cursor:pointer;
+}
+.fta{resize:vertical;min-height:72px;border:1.5px solid var(--border2);border-radius:var(--r2);padding:.5rem .6rem;margin-top:2px}
+.fta:focus{border-color:var(--brand)}
+
+/* focus bar */
+.fbar{position:absolute;bottom:0;left:1.4rem;right:1.4rem;height:2px;background:var(--brand);border-radius:99px;transform:scaleX(0);transition:transform .25s ease;transform-origin:left}
+.fi:focus~.fbar,.fsel:focus~.fbar{transform:scaleX(1)}
+
+.emsg{font-size:.7rem;color:var(--danger);min-height:.95rem;margin-top:.25rem}
+.char-count{font-size:.67rem;color:var(--ink4);text-align:right;margin-top:3px}
+
+/* Salary prefix */
+.prefix-wrap{display:flex;align-items:flex-end;gap:.35rem}
+.prefix{font-size:.92rem;font-weight:700;color:var(--ink3);padding-bottom:.42rem;flex-shrink:0;line-height:1}
+.prefix-wrap .fi{flex:1}
+.sal-hint{font-size:.68rem;color:var(--brand);font-weight:600;margin-top:3px}
+
+/* Checkbox */
+.cbx-wrap{display:flex;align-items:center;gap:.6rem;cursor:pointer;user-select:none;padding:.5rem 0}
+.cbx-wrap input{display:none}
+.cbx-box{
+  width:18px;height:18px;border-radius:5px;border:2px solid var(--border2);
+  background:var(--surface2);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.cbx-wrap input:checked+.cbx-box{background:var(--brand);border-color:var(--brand)}
+.cbx-wrap input:checked+.cbx-box::after{
+  content:'';width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;
+  transform:rotate(45deg);margin-top:-2px;
+}
+.cbx-lbl{font-size:.82rem;font-weight:500;color:var(--ink2)}
+
+/* Form footer */
+.fcard-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.4rem;border-top:1px solid var(--border);
+  background:var(--surface2);flex-wrap:wrap;gap:.65rem;
+}
+.foot-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  border:none;cursor:pointer;border-radius:var(--r2);
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;
+  transition:all .22s ease;font-size:.8rem;padding:.48rem 1rem;
+}
+.btn-ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--ink2)}
+.btn-ghost:hover{border-color:var(--danger);color:var(--danger)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--brand),var(--violet));color:#fff;
+  box-shadow:0 4px 14px var(--brand-glow);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--brand-glow)}
+.btn-primary:active{transform:none}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{background:var(--brand)}
+.btn-teal{background:linear-gradient(135deg,var(--teal),#0e7490);color:#fff;box-shadow:0 4px 14px rgba(8,145,178,.2)}
+.btn-teal:hover{transform:translateY(-1px)}
+.btn-success{background:linear-gradient(135deg,var(--emerald),#10b981);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.2)}
+.btn-success:hover{transform:translateY(-1px)}
+.btn-outline-brand{background:var(--brand4);border:1.5px solid var(--brand);color:var(--brand)}
+.btn-outline-brand:hover{background:var(--brand);color:#fff}
+.btn-outline-teal{background:#ecfeff;border:1.5px solid var(--teal);color:var(--teal)}
+.btn-outline-teal:hover{background:var(--teal);color:#fff}
+.btn-sm{padding:.32rem .7rem;font-size:.72rem}
+.btn-lg{padding:.62rem 1.5rem;font-size:.88rem}
+
+/* ── RECORDS TABLE ─────────────────────────────────────────── */
+.rcard{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--sh);
+  overflow:hidden;margin-bottom:1.5rem;
+  animation:panelIn .3s ease;
+}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.rcard-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.8rem 1.25rem;border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}
+.rcard-title{
+  font-size:.72rem;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.06em;
+  display:flex;align-items:center;gap:.45rem;
+}
+.rcard-title i{font-size:.85rem;color:var(--brand)}
+.rbadge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;border-radius:99px;padding:0 5px;
+  background:var(--brand);color:#fff;
+  font-size:.64rem;font-weight:800;margin-left:.35rem;
+}
+
+.rtable{width:100%;border-collapse:collapse;font-size:.78rem}
+.rtable thead tr{background:var(--surface2)}
+.rtable th{
+  padding:.65rem 1rem;text-align:left;
+  font-size:.65rem;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+.rtable td{
+  padding:.7rem 1rem;border-bottom:1px solid var(--border);
+  color:var(--ink2);vertical-align:middle;
+  max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.rtable tbody tr{transition:background .15s}
+.rtable tbody tr:hover{background:var(--brand4)}
+.rtable tbody tr:last-child td{border-bottom:none}
+
+.rnum{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--brand3);color:var(--brand);
+  font-size:.64rem;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.tbtn{
+  border:none;cursor:pointer;border-radius:6px;
+  width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:.7rem;transition:all .18s;
+}
+.tbtn-edit{background:#eff6ff;color:var(--brand)}
+.tbtn-edit:hover{background:var(--brand);color:#fff}
+.tbtn-del{background:var(--danger-lt);color:var(--danger)}
+.tbtn-del:hover{background:var(--danger);color:#fff}
+.tactions{display:flex;gap:5px}
+.status-dot{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--success);margin-right:5px;vertical-align:middle;
+}
+.status-dot.inactive{background:var(--ink4)}
+
+/* Exp summary row */
+.exp-stats{
+  display:flex;border-top:1px solid var(--border);
+}
+.exp-stat{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:.9rem;gap:.2rem;background:var(--surface2);transition:background .2s;
+}
+.exp-stat:not(:last-child){border-right:1px solid var(--border)}
+.exp-stat:hover{background:var(--brand4)}
+.es-icon{font-size:1rem;color:var(--ink4)}
+.es-val{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;color:var(--brand)}
+.es-lbl{font-size:.64rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+
+/* ── PAGE NAV BAR ─────────────────────────────────────────── */
+.pg-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 0 0;border-top:1px solid var(--border);margin-top:1.25rem;
+  flex-wrap:wrap;gap:.75rem;
+}
+
+/* ── TOAST ─────────────────────────────────────────────── */
+#toast-stack{
+  position:fixed;top:76px;right:1.25rem;z-index:9999;
+  display:flex;flex-direction:column;gap:.45rem;pointer-events:none;
+}
+.toast{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:.68rem .95rem;
+  display:flex;align-items:center;gap:.65rem;
+  box-shadow:var(--sh2);min-width:250px;max-width:320px;
+  pointer-events:auto;border-left:4px solid var(--brand);
+  animation:tIn .28s ease;font-size:.79rem;
+}
+.toast.success{border-left-color:var(--success)}
+.toast.error{border-left-color:var(--danger)}
+.toast.warn{border-left-color:var(--warning)}
+@keyframes tIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:none}}
+@keyframes tOut{to{opacity:0;transform:translateX(110%)}}
+.toast-icon{font-size:.9rem;flex-shrink:0}
+.toast.success .toast-icon{color:var(--success)}
+.toast.error .toast-icon{color:var(--danger)}
+.toast.warn .toast-icon{color:var(--warning)}
+.toast:not(.success):not(.error):not(.warn) .toast-icon{color:var(--brand)}
+.toast-msg{font-weight:500;color:var(--ink);flex:1}
+
+/* ── MODALS ─────────────────────────────────────────────── */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(14,23,38,.55);backdrop-filter:blur(5px);
+  align-items:center;justify-content:center;padding:1rem;
+}
+.overlay.open{display:flex;animation:ovIn .2s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--surface);border-radius:var(--r);
+  width:100%;max-width:640px;max-height:88vh;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:var(--sh3);
+  animation:mIn .28s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes mIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.3rem;border-bottom:1px solid var(--border);
+  background:var(--surface2);flex-shrink:0;
+}
+.modal-title{font-family:'Fraunces',serif;font-size:.95rem;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:.5rem}
+.modal-title i{color:var(--brand)}
+.modal-close{
+  background:none;border:none;cursor:pointer;color:var(--ink3);
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;font-size:.95rem;transition:all .2s;
+}
+.modal-close:hover{background:var(--border);color:var(--ink)}
+.modal-body{padding:1.1rem 1.3rem;overflow-y:auto;flex:1}
+.modal-foot{
+  display:flex;align-items:center;justify-content:flex-end;gap:.6rem;
+  padding:.85rem 1.3rem;border-top:1px solid var(--border);
+  background:var(--surface2);flex-shrink:0;
+}
+
+/* Delete modal */
+.del-modal{max-width:360px;text-align:center;padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:.75rem}
+.del-icon{width:56px;height:56px;border-radius:50%;background:var(--danger-lt);color:var(--danger);font-size:1.5rem;display:flex;align-items:center;justify-content:center}
+.del-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--ink)}
+.del-msg{font-size:.78rem;color:var(--ink3);line-height:1.5}
+.del-actions{display:flex;gap:.6rem;margin-top:.4rem}
+.btn-danger{background:var(--danger);color:#fff;border:none;border-radius:var(--r2);padding:.48rem 1rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.btn-danger:hover{background:#dc2626}
+
+/* Modal field helpers */
+.mfield{margin-bottom:1rem}
+.mrow{display:flex;gap:1rem}
+.mrow .mfield{flex:1}
+.mfield .fl{display:block;margin-bottom:.4rem}
+.mfield .fi,.mfield .fsel{border-bottom:1.5px solid var(--border2)}
+.mfield .fi:focus,.mfield .fsel:focus{border-bottom-color:var(--brand)}
+
+/* ── SUCCESS OVERLAY ─────────────────────────────────────── */
+#success-ov{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(14,23,38,.65);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+}
+.scard{
+  background:var(--surface);border-radius:18px;
+  padding:2.75rem 2.25rem;text-align:center;max-width:400px;width:90%;
+  box-shadow:var(--sh3);animation:mIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.scard-icon{font-size:3.5rem;color:var(--success);animation:sPop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes sPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.scard h2{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:var(--ink);margin:.75rem 0 .4rem}
+.scard p{font-size:.82rem;color:var(--ink3)}
+.scard-stats{
+  display:flex;gap:.75rem;justify-content:center;margin:1.1rem 0;
+}
+.sstat{
+  flex:1;background:var(--surface2);border-radius:var(--r2);padding:.75rem;
+  font-size:.75rem;color:var(--ink2);
+}
+.sstat strong{display:block;font-family:'Fraunces',serif;font-size:1.3rem;color:var(--brand)}
+
+/* ── DASHBOARD PAGE ─────────────────────────────────────── */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem}
+.dcard{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.25rem 1rem;
+  box-shadow:var(--sh);text-align:center;
+  position:relative;overflow:hidden;transition:all .22s;
+}
+.dcard:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.dcard::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--accent,var(--brand));
+}
+.dcard-icon{font-size:1.4rem;color:var(--accent,var(--brand));margin-bottom:.5rem}
+.dcard-val{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--ink)}
+.dcard-lbl{font-size:.7rem;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:.15rem}
+
+.dash-checklist{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+.dcl-item{
+  display:flex;align-items:center;gap:.55rem;
+  padding:.5rem .65rem;border-radius:var(--r2);
+  font-size:.78rem;font-weight:500;color:var(--ink3);
+  cursor:pointer;transition:all .18s;
+}
+.dcl-item:hover{background:var(--brand4);color:var(--brand)}
+.dcl-item.done{color:var(--success)}
+.dcl-icon{font-size:.75rem;flex-shrink:0}
+.dcl-item.done .dcl-icon{color:var(--success)}
+
+.dash-profile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem}
+.dash-avatar{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--violet));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:#fff;
+  border:3px solid var(--surface);box-shadow:0 0 0 3px var(--border);
+  overflow:hidden;
+}
+.dash-avatar img{width:100%;height:100%;object-fit:cover}
+.dash-name{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--ink)}
+.dash-email{font-size:.75rem;color:var(--ink3)}
+
+/* two-col row helper */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+@media(max-width:900px){
+  .sidebar{width:var(--sidebar-open) !important;transform:translateX(-100%)}
+  .sidebar.mob-open{transform:translateX(0) !important}
+  .main{margin-left:0 !important}
+  .hdr-progress{display:none}
+}
+@media(max-width:640px){
+  .fg{grid-template-columns:1fr}
+  .fg .fc{border-right:none}
+  .fg .fc.full{grid-column:unset}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+  .dash-checklist{grid-template-columns:1fr}
+  .mrow{flex-direction:column;gap:0}
+  .main{padding:1rem .85rem 3rem}
+  .fcard-foot{flex-direction:column}
+  .foot-right{flex-direction:column;width:100%}
+  .foot-right .btn{width:100%;justify-content:center}
+  .btn-ghost{width:100%;justify-content:center}
+  .pg-nav{flex-direction:column}
+  .pg-nav .btn{width:100%;justify-content:center}
+  .exp-stats{flex-direction:column}
+  .scard-stats{flex-direction:column}
+}
+@media(max-width:420px){
+  .hdr{padding:0 .85rem}
+  .hdr-uname,.hdr-uid{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+  HEADER
+═══════════════════════════════════ -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo"><span>NX</span></div>
+    <div class="hdr-title">
+      <span class="hdr-name">Nexus<b>HRMS</b></span>
+      <span class="hdr-sub">Employee Profile Portal</span>
+    </div>
+  </div>
+
+  <div class="hdr-progress">
+    <span class="hdr-pct">Profile <span id="pctLabel">0%</span> Complete</span>
+    <div class="hdr-track"><div class="hdr-bar" id="hdrBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="hdr-user">
+    <div class="hdr-avatar" id="hdrAvatar">JD</div>
+    <div>
+      <div class="hdr-uname" id="hdrName">John Doe</div>
+      <div class="hdr-uid">EMP-2024-001</div>
+    </div>
+  </div>
+</header>
+
+<!-- mobile toggle -->
+<button id="mobToggle" style="display:none;position:fixed;bottom:1.4rem;left:1.4rem;z-index:1100;width:46px;height:46px;border-radius:50%;background:var(--brand);color:#fff;border:none;font-size:1rem;cursor:pointer;box-shadow:0 6px 20px var(--brand-glow);align-items:center;justify-content:center">
+  <i class="fa-solid fa-bars"></i>
+</button>
+<div id="sbBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:799;backdrop-filter:blur(2px)"></div>
+
+<!-- ═══════════════════════════════════
+  LAYOUT
+═══════════════════════════════════ -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-toggle">
+      <button class="btn-toggle" id="sbToggle" title="Collapse"><i class="fa-solid fa-bars"></i></button>
+    </div>
+
+    <nav class="sb-nav" id="sbNav">
+      <!-- injected by JS -->
+    </nav>
+
+    <div class="sb-foot">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="22" class="ring-bg"/>
+          <circle cx="26" cy="26" r="22" class="ring-fill" id="ringFill" stroke-dasharray="0 138.2"/>
+        </svg>
+        <span class="ring-label" id="ringLabel">0%</span>
+      </div>
+      <span class="ring-text">Completion</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+
+    <!-- Toast container -->
+    <div id="toast-stack"></div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 0 — DASHBOARD
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page active" id="pg-0">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#2563eb,#7c3aed)"><i class="fa-solid fa-gauge-high"></i></div>
+          <div>
+            <div class="pg-title">Dashboard</div>
+            <div class="pg-sub">Overview of your employee profile progress</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dcard" style="--accent:#2563eb"><div class="dcard-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="dcard-val" id="dashAcadCnt">0</div><div class="dcard-lbl">Qualifications</div></div>
+        <div class="dcard" style="--accent:#0891b2"><div class="dcard-icon"><i class="fa-solid fa-briefcase"></i></div><div class="dcard-val" id="dashExpCnt">0</div><div class="dcard-lbl">Experience Records</div></div>
+        <div class="dcard" style="--accent:#7c3aed"><div class="dcard-icon"><i class="fa-solid fa-language"></i></div><div class="dcard-val" id="dashLangCnt">0</div><div class="dcard-lbl">Languages</div></div>
+        <div class="dcard" style="--accent:#059669"><div class="dcard-icon"><i class="fa-solid fa-percent"></i></div><div class="dcard-val" id="dashPct">0%</div><div class="dcard-lbl">Completion</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="fcard">
+          <div class="fcard-head">
+            <span class="fcard-label"><i class="fa-solid fa-list-check"></i> Section Checklist</span>
+          </div>
+          <div style="padding:1rem 1.1rem">
+            <div class="dash-checklist" id="dashChecklist"></div>
+          </div>
+        </div>
+        <div class="fcard" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;gap:.85rem">
+          <div class="dash-profile">
+            <div class="dash-avatar" id="dashAvatarCircle">JD</div>
+            <div class="dash-name" id="dashProfileName">John Doe</div>
+            <div class="dash-email" id="dashProfileEmail">—</div>
+          </div>
+          <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" onclick="goPage(1)">
+            <i class="fa-solid fa-play me-1"></i> Begin Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 1 — PERSONAL INFO
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page" id="pg-1">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#7c3aed,#2563eb)"><i class="fa-solid fa-user"></i></div>
+          <div><div class="pg-title">Personal Information</div><div class="pg-sub">Basic personal and demographic details</div></div>
+        </div>
+      </div>
+      <div class="info-banner blue"><i class="fa-solid fa-circle-info bi-icon"></i><span>Fill all fields marked <span class="req">*</span>. This data forms the base of your employee record.</span></div>
+
+      <div class="fcard">
+        <div class="fcard-head"><span class="fcard-label"><i class="fa-solid fa-id-card"></i> Identity Details</span></div>
+        <div class="fcard-body">
+          <div class="fg">
+            <div class="fc">
+              <label class="fl">Title <span class="req">*</span></label>
+              <select class="fsel" id="pi_title"><option value="">Select</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option><option>Prof.</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_pi_title"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">First Name <span class="req">*</span></label>
+              <input class="fi" id="pi_first" placeholder="First name" maxlength="40"/>
+              <div class="fbar"></div><div class="emsg" id="e_pi_first"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Middle Name</label>
+              <input class="fi" id="pi_mid" placeholder="Middle name" maxlength="40"/>
+              <div class="fbar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Last Name <span class="req">*</span></label>
+              <input class="fi" id="pi_last" placeholder="Last name" maxlength="40"/>
+              <div class="fbar"></div><div class="emsg" id="e_pi_last"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Date of Birth <span class="req">*</span></label>
+              <input class="fi" type="date" id="pi_dob"/>
+              <div class="fbar"></div><div class="emsg" id="e_pi_dob"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Gender <span class="req">*</span></label>
+              <select class="fsel" id="pi_gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_pi_gender"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Personal Email <span class="req">*</span></label>
+              <input class="fi" type="email" id="pi_email" placeholder="email@example.com" maxlength="80"/>
+              <div class="fbar"></div><div class="emsg" id="e_pi_email"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Mobile Number <span class="req">*</span></label>
+              <input class="fi" id="pi_phone" placeholder="+91 98765 43210" maxlength="15" inputmode="tel"/>
+              <div class="fbar"></div><div class="emsg" id="e_pi_phone"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Nationality <span class="req">*</span></label>
+              <input class="fi" id="pi_nation" placeholder="e.g. Indian" maxlength="40"/>
+              <div class="fbar"></div><div class="emsg" id="e_pi_nation"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Highest Qualification <span class="req">*</span></label>
+              <select class="fsel" id="pi_qual"><option value="">Select</option><option>High School</option><option>Diploma</option><option>Bachelor's</option><option>Master's</option><option>MBA</option><option>PhD</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_pi_qual"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Blood Group</label>
+              <select class="fsel" id="pi_blood"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select>
+              <div class="fbar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Known As (Nickname)</label>
+              <input class="fi" id="pi_aka" placeholder="Optional" maxlength="30"/>
+              <div class="fbar"></div>
+            </div>
+          </div>
+        </div>
+        <div class="fcard-foot">
+          <button class="btn btn-ghost" onclick="resetPI()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <div class="foot-right">
+            <button class="btn btn-primary" onclick="savePI()"><i class="fa-solid fa-floppy-disk"></i> Save & Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg-nav">
+        <button class="btn btn-ghost" onclick="goPage(0)"><i class="fa-solid fa-chevron-left"></i> Dashboard</button>
+        <button class="btn btn-dark" onclick="goPage(2)">Academic Qualification <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 2 — ACADEMIC QUALIFICATION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page" id="pg-2">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#2563eb,#0891b2)"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div><div class="pg-title">Academic Qualification</div><div class="pg-sub">Educational background and degree records</div></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="editAcadBtn" onclick="toggleAcadForm()" style="display:none"><i class="fa-solid fa-pen-to-square"></i> Edit Section</button>
+      </div>
+      <div class="info-banner blue"><i class="fa-solid fa-circle-info bi-icon"></i><span>Add each qualification separately. All fields marked <span class="req">*</span> are mandatory. Use <strong>Save Record</strong> to add and see the table below.</span></div>
+
+      <div class="fcard" id="acadForm">
+        <div class="fcard-head">
+          <span class="fcard-label"><i class="fa-solid fa-plus-circle"></i> Add Qualification</span>
+          <button class="btn-reset" onclick="resetAcad()" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
+        </div>
+        <div class="fcard-body">
+          <div class="fg">
+            <div class="fc">
+              <label class="fl">Qualification <span class="req">*</span></label>
+              <select class="fsel" id="aq_qual"><option value="">Select</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_aq_qual"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Specialization <span class="req">*</span></label>
+              <select class="fsel" id="aq_spec"><option value="">Select</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_aq_spec"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">University / Board <span class="req">*</span></label>
+              <input class="fi" id="aq_univ" placeholder="University or board name" maxlength="120"/>
+              <div class="fbar"></div><div class="emsg" id="e_aq_univ"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Institute / College <span class="req">*</span></label>
+              <input class="fi" id="aq_inst" placeholder="College or institute name" maxlength="120"/>
+              <div class="fbar"></div><div class="emsg" id="e_aq_inst"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Location of Institute <span class="req">*</span></label>
+              <input class="fi" id="aq_loc" placeholder="City, State" maxlength="80"/>
+              <div class="fbar"></div><div class="emsg" id="e_aq_loc"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Medium of Instruction <span class="req">*</span></label>
+              <select class="fsel" id="aq_med"><option value="">Select</option><option>English</option><option>Hindi</option><option>Tamil</option><option>Telugu</option><option>Kannada</option><option>Malayalam</option><option>Marathi</option><option>Bengali</option><option>Other</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_aq_med"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Course Type <span class="req">*</span></label>
+              <select class="fsel" id="aq_ctype"><option value="">Select</option><option>Full Time</option><option>Part Time</option><option>Distance / Correspondence</option><option>Online</option><option>Executive</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_aq_ctype"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Year of Passing <span class="req">*</span></label>
+              <input class="fi" id="aq_year" placeholder="YYYY" maxlength="4" inputmode="numeric"/>
+              <div class="fbar"></div><div class="emsg" id="e_aq_year"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Course Appraisal <span class="req">*</span></label>
+              <select class="fsel" id="aq_appr"><option value="">Select</option><option>Percentage (%)</option><option>CGPA (10-point)</option><option>CGPA (4-point)</option><option>Grade (A-F)</option><option>Pass / Fail</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_aq_appr"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Score / Grade <span class="req">*</span></label>
+              <input class="fi" id="aq_score" placeholder="e.g. 85% or 8.5 CGPA" maxlength="20"/>
+              <div class="fbar"></div><div class="emsg" id="e_aq_score"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Roll Number <span class="req">*</span></label>
+              <input class="fi" id="aq_roll" placeholder="Enrollment / Roll number" maxlength="30"/>
+              <div class="fbar"></div><div class="emsg" id="e_aq_roll"></div>
+            </div>
+          </div>
+        </div>
+        <div class="fcard-foot">
+          <button class="btn btn-ghost" onclick="resetAcad()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <div class="foot-right">
+            <button class="btn btn-primary" onclick="saveAcad()"><i class="fa-solid fa-floppy-disk"></i> Save Record</button>
+            <button class="btn btn-dark" onclick="saveAcadNext()">Save & Next <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Records table -->
+      <div id="acadPanel" style="display:none">
+        <div class="rcard">
+          <div class="rcard-head">
+            <span class="rcard-title"><i class="fa-solid fa-table"></i> Saved Qualifications <span class="rbadge" id="acadBadge">0</span></span>
+            <button class="btn btn-outline-brand btn-sm" onclick="showAcadForm()"><i class="fa-solid fa-plus"></i> Add More</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="rtable">
+              <thead><tr><th>#</th><th>Qualification</th><th>Specialization</th><th>University</th><th>Institute</th><th>Year</th><th>Score</th><th>Type</th><th>Actions</th></tr></thead>
+              <tbody id="acadTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg-nav">
+        <button class="btn btn-ghost" onclick="goPage(1)"><i class="fa-solid fa-chevron-left"></i> Personal Info</button>
+        <button class="btn btn-dark" onclick="goPage(3)">Work Experience <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 3 — WORK EXPERIENCE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page" id="pg-3">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#0891b2,#059669)"><i class="fa-solid fa-briefcase"></i></div>
+          <div><div class="pg-title">Work Experience</div><div class="pg-sub">Previous and current employment records</div></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="editExpBtn" onclick="toggleExpForm()" style="display:none"><i class="fa-solid fa-pen-to-square"></i> Edit Section</button>
+      </div>
+      <div class="info-banner teal"><i class="fa-solid fa-circle-info bi-icon"></i><span>Salary values should be in <strong>₹ per annum</strong>. Variable pay = performance bonus/incentives. Add each company separately.</span></div>
+
+      <div class="fcard" id="expFormCard">
+        <div class="fcard-head">
+          <span class="fcard-label"><i class="fa-solid fa-plus-circle"></i> Add Experience</span>
+          <button class="btn-reset" onclick="resetExp()" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
+        </div>
+        <div class="fcard-body">
+          <div class="fg">
+            <div class="fc">
+              <label class="fl">Name of Organization <span class="req">*</span></label>
+              <input class="fi" id="ex_org" placeholder="Company / Organization name" maxlength="120"/>
+              <div class="fbar"></div><div class="emsg" id="e_ex_org"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Location <span class="req">*</span></label>
+              <input class="fi" id="ex_loc" placeholder="City, State / Country" maxlength="80"/>
+              <div class="fbar"></div><div class="emsg" id="e_ex_loc"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Functional Area <span class="req">*</span></label>
+              <select class="fsel" id="ex_area"><option value="">Select Functional Area</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_ex_area"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Last Designation <span class="req">*</span></label>
+              <input class="fi" id="ex_desig" placeholder="e.g. Senior Software Engineer" maxlength="80"/>
+              <div class="fbar"></div><div class="emsg" id="e_ex_desig"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Experience Type <span class="req">*</span></label>
+              <select class="fsel" id="ex_type"><option value="">Select Type</option><option>Full Time - Permanent</option><option>Full Time - Contract</option><option>Part Time</option><option>Internship</option><option>Freelance / Consulting</option><option>Apprenticeship</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_ex_type"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Industry Sector</label>
+              <select class="fsel" id="ex_sector"><option value="">Select Sector</option></select>
+              <div class="fbar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">From Date <span class="req">*</span></label>
+              <input class="fi" type="month" id="ex_from"/>
+              <div class="fbar"></div><div class="emsg" id="e_ex_from"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">To Date</label>
+              <input class="fi" type="month" id="ex_to"/>
+              <div class="fbar"></div><div class="emsg" id="e_ex_to"></div>
+            </div>
+            <div class="fc" style="padding-top:.9rem">
+              <label class="cbx-wrap">
+                <input type="checkbox" id="ex_curr" onchange="toggleCurrJob()"/>
+                <span class="cbx-box"></span>
+                <span class="cbx-lbl">Currently Working Here</span>
+              </label>
+            </div>
+            <div class="fc">
+              <label class="fl">Notice Period</label>
+              <select class="fsel" id="ex_notice"><option value="">Select</option><option>Immediate Joiner</option><option>15 Days</option><option>1 Month</option><option>2 Months</option><option>3 Months</option><option>More than 3 Months</option></select>
+              <div class="fbar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Last Gross Salary (Per Annum) <span class="req">*</span></label>
+              <div class="prefix-wrap">
+                <span class="prefix">₹</span>
+                <input class="fi" id="ex_sal" placeholder="e.g. 1200000" maxlength="12" inputmode="numeric"/>
+              </div>
+              <div class="fbar"></div>
+              <div class="sal-hint" id="salHint"></div>
+              <div class="emsg" id="e_ex_sal"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Variable Pay (Per Annum)</label>
+              <div class="prefix-wrap">
+                <span class="prefix">₹</span>
+                <input class="fi" id="ex_var" placeholder="e.g. 150000" maxlength="12" inputmode="numeric"/>
+              </div>
+              <div class="fbar"></div>
+              <div class="sal-hint" id="varHint"></div>
+            </div>
+            <div class="fc full">
+              <label class="fl">Key Responsibilities</label>
+              <textarea class="fta" id="ex_resp" placeholder="Describe your role and responsibilities..." rows="3" maxlength="500"></textarea>
+              <div class="char-count"><span id="respLen">0</span>/500</div>
+            </div>
+          </div>
+        </div>
+        <div class="fcard-foot">
+          <button class="btn btn-ghost" onclick="resetExp()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <div class="foot-right">
+            <button class="btn btn-teal" onclick="saveExp()"><i class="fa-solid fa-floppy-disk"></i> Save Record</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Records panel -->
+      <div id="expPanel" style="display:none">
+        <div class="rcard">
+          <div class="rcard-head">
+            <span class="rcard-title"><i class="fa-solid fa-table"></i> Saved Experiences <span class="rbadge" id="expBadge">0</span></span>
+            <button class="btn btn-outline-teal btn-sm" onclick="showExpForm()"><i class="fa-solid fa-plus"></i> Add More</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="rtable">
+              <thead><tr><th>#</th><th>Organization</th><th>Location</th><th>Functional Area</th><th>Designation</th><th>Type</th><th>Duration</th><th>Gross Salary</th><th>Actions</th></tr></thead>
+              <tbody id="expTbody"></tbody>
+            </table>
+          </div>
+          <div class="exp-stats">
+            <div class="exp-stat"><div class="es-icon"><i class="fa-solid fa-clock"></i></div><div class="es-val" id="totalExp">0 yrs</div><div class="es-lbl">Total Experience</div></div>
+            <div class="exp-stat"><div class="es-icon"><i class="fa-solid fa-building"></i></div><div class="es-val" id="totalOrgs">0</div><div class="es-lbl">Organizations</div></div>
+            <div class="exp-stat"><div class="es-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div><div class="es-val" id="avgCTC">—</div><div class="es-lbl">Avg. CTC</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg-nav">
+        <button class="btn btn-ghost" onclick="goPage(2)"><i class="fa-solid fa-chevron-left"></i> Academic</button>
+        <button class="btn btn-dark" onclick="goPage(4)">Language Skills <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 4 — LANGUAGE SKILLS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page" id="pg-4">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#7c3aed,#e11d48)"><i class="fa-solid fa-language"></i></div>
+          <div><div class="pg-title">Language Skills</div><div class="pg-sub">Languages you speak and their proficiency</div></div>
+        </div>
+      </div>
+      <div class="info-banner violet"><i class="fa-solid fa-circle-info bi-icon"></i><span>Add all languages you know. You can add multiple languages — one at a time.</span></div>
+
+      <div class="fcard">
+        <div class="fcard-head">
+          <span class="fcard-label"><i class="fa-solid fa-comments"></i> Add Language</span>
+          <button class="btn-reset" onclick="resetLang()" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
+        </div>
+        <div class="fcard-body">
+          <div class="fg">
+            <div class="fc">
+              <label class="fl">Language <span class="req">*</span></label>
+              <input class="fi" id="lg_name" placeholder="e.g. Tamil, French, Japanese" maxlength="40"/>
+              <div class="fbar"></div><div class="emsg" id="e_lg_name"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Proficiency Level <span class="req">*</span></label>
+              <select class="fsel" id="lg_prof"><option value="">Select</option><option>Beginner</option><option>Elementary</option><option>Intermediate</option><option>Upper Intermediate</option><option>Advanced</option><option>Native / Fluent</option></select>
+              <div class="fbar"></div><div class="emsg" id="e_lg_prof"></div>
+            </div>
+            <div class="fc" style="padding-top:.9rem">
+              <label class="cbx-wrap"><input type="checkbox" id="lg_read"/><span class="cbx-box"></span><span class="cbx-lbl">Read</span></label>
+            </div>
+            <div class="fc" style="padding-top:.9rem">
+              <label class="cbx-wrap"><input type="checkbox" id="lg_write"/><span class="cbx-box"></span><span class="cbx-lbl">Write</span></label>
+            </div>
+            <div class="fc" style="padding-top:.4rem">
+              <label class="cbx-wrap"><input type="checkbox" id="lg_speak"/><span class="cbx-box"></span><span class="cbx-lbl">Speak</span></label>
+            </div>
+          </div>
+        </div>
+        <div class="fcard-foot">
+          <button class="btn btn-ghost" onclick="resetLang()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <div class="foot-right">
+            <button class="btn btn-primary" onclick="saveLang()"><i class="fa-solid fa-floppy-disk"></i> Save Language</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="langPanel" style="display:none">
+        <div class="rcard">
+          <div class="rcard-head">
+            <span class="rcard-title"><i class="fa-solid fa-table"></i> Languages Added <span class="rbadge" id="langBadge">0</span></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="rtable">
+              <thead><tr><th>#</th><th>Language</th><th>Proficiency</th><th>Read</th><th>Write</th><th>Speak</th><th>Actions</th></tr></thead>
+              <tbody id="langTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg-nav">
+        <button class="btn btn-ghost" onclick="goPage(3)"><i class="fa-solid fa-chevron-left"></i> Work Experience</button>
+        <button class="btn btn-dark" onclick="goPage(5)">Bank Information <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 5 — BANK INFO
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page" id="pg-5">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#059669,#0891b2)"><i class="fa-solid fa-building-columns"></i></div>
+          <div><div class="pg-title">Bank Information</div><div class="pg-sub">Salary account and banking details</div></div>
+        </div>
+      </div>
+      <div class="info-banner blue"><i class="fa-solid fa-lock bi-icon"></i><span>Your bank details are encrypted and used only for payroll processing.</span></div>
+
+      <div class="fcard">
+        <div class="fcard-head"><span class="fcard-label"><i class="fa-solid fa-credit-card"></i> Account Details</span></div>
+        <div class="fcard-body">
+          <div class="fg">
+            <div class="fc">
+              <label class="fl">Account Number <span class="req">*</span></label>
+              <input class="fi" id="bk_acc" placeholder="Account number" maxlength="20" inputmode="numeric"/>
+              <div class="fbar"></div><div class="emsg" id="e_bk_acc"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Confirm Account Number <span class="req">*</span></label>
+              <input class="fi" id="bk_acc2" placeholder="Re-enter account number" maxlength="20" inputmode="numeric"/>
+              <div class="fbar"></div><div class="emsg" id="e_bk_acc2"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">IFSC Code <span class="req">*</span></label>
+              <input class="fi" id="bk_ifsc" placeholder="e.g. SBIN0001234" maxlength="11" style="text-transform:uppercase"/>
+              <div class="fbar"></div><div class="emsg" id="e_bk_ifsc"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Bank Name <span class="req">*</span></label>
+              <input class="fi" id="bk_name" placeholder="Bank name" maxlength="80"/>
+              <div class="fbar"></div><div class="emsg" id="e_bk_name"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Branch Name</label>
+              <input class="fi" id="bk_branch" placeholder="Branch" maxlength="60"/>
+              <div class="fbar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Account Type</label>
+              <select class="fsel" id="bk_type"><option>Savings</option><option>Current</option><option>Salary</option></select>
+              <div class="fbar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">Aadhaar Number <span class="req">*</span></label>
+              <input class="fi" id="bk_aadhaar" placeholder="12-digit Aadhaar" maxlength="12" inputmode="numeric"/>
+              <div class="fbar"></div><div class="emsg" id="e_bk_aadhaar"></div>
+            </div>
+            <div class="fc">
+              <label class="fl">PAN Number <span class="req">*</span></label>
+              <input class="fi" id="bk_pan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/>
+              <div class="fbar"></div><div class="emsg" id="e_bk_pan"></div>
+            </div>
+          </div>
+        </div>
+        <div class="fcard-foot">
+          <button class="btn btn-ghost" onclick="resetBank()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <div class="foot-right">
+            <button class="btn btn-primary" onclick="saveBank()"><i class="fa-solid fa-floppy-disk"></i> Save Bank Info</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg-nav">
+        <button class="btn btn-ghost" onclick="goPage(4)"><i class="fa-solid fa-chevron-left"></i> Language Skills</button>
+        <button class="btn btn-dark" onclick="goPage(6)">Summary & Submit <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PAGE 6 — SUMMARY
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="page" id="pg-6">
+      <div class="pg-header">
+        <div class="pg-title-wrap">
+          <div class="pg-icon" style="background:linear-gradient(135deg,#059669,#2563eb)"><i class="fa-solid fa-clipboard-check"></i></div>
+          <div><div class="pg-title">Profile Summary</div><div class="pg-sub">Review all information before submitting</div></div>
+        </div>
+      </div>
+      <div id="summaryContent"></div>
+      <div class="fcard" style="text-align:center;padding:1.75rem">
+        <div style="font-size:.85rem;color:var(--ink3);margin-bottom:1.1rem">By submitting, you confirm that all information provided is accurate and complete.</div>
+        <button class="btn btn-success btn-lg" onclick="submitProfile()"><i class="fa-solid fa-paper-plane"></i> Submit Profile</button>
+      </div>
+      <div class="pg-nav">
+        <button class="btn btn-ghost" onclick="goPage(5)"><i class="fa-solid fa-chevron-left"></i> Bank Info</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════
+  MODALS
+═══════════════════════════════════ -->
+<!-- Academic Edit Modal -->
+<div class="overlay" id="acadModal" onclick="closeModal('acadModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fa-solid fa-graduation-cap"></i> Edit Academic Record</div>
+      <button class="modal-close" onclick="closeModal('acadModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="acadModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('acadModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateAcad()"><i class="fa-solid fa-floppy-disk"></i> Update Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Work Experience Edit Modal -->
+<div class="overlay" id="expModal" onclick="closeModal('expModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fa-solid fa-briefcase"></i> Edit Work Experience</div>
+      <button class="modal-close" onclick="closeModal('expModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="expModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('expModal')">Cancel</button>
+      <button class="btn btn-teal" onclick="updateExp()"><i class="fa-solid fa-floppy-disk"></i> Update Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lang Edit Modal -->
+<div class="overlay" id="langModal" onclick="closeModal('langModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fa-solid fa-language"></i> Edit Language</div>
+      <button class="modal-close" onclick="closeModal('langModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="langModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('langModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateLang()"><i class="fa-solid fa-floppy-disk"></i> Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="overlay" id="delModal" onclick="closeModal('delModal')">
+  <div class="modal del-modal" onclick="event.stopPropagation()">
+    <div class="del-icon"><i class="fa-solid fa-trash-can"></i></div>
+    <div class="del-title">Delete Record?</div>
+    <div class="del-msg" id="delMsg">This action cannot be undone.</div>
+    <div class="del-actions">
+      <button class="btn btn-ghost" onclick="closeModal('delModal')">Cancel</button>
+      <button class="btn-danger" id="delConfirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success -->
+<div id="success-ov">
+  <div class="scard">
+    <div class="scard-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <h2>Profile Submitted!</h2>
+    <p>Your employee profile has been successfully saved and submitted.</p>
+    <div class="scard-stats">
+      <div class="sstat"><strong id="sAcad">0</strong>Academic Records</div>
+      <div class="sstat"><strong id="sExp">0</strong>Experience Records</div>
+      <div class="sstat"><strong id="sLang">0</strong>Languages</div>
+    </div>
+    <button class="btn btn-primary btn-lg" style="margin-top:1rem;width:100%;justify-content:center" onclick="document.getElementById('success-ov').style.display='none'">
+      <i class="fa-solid fa-check"></i> Done
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JS — All logic in one <script> block
+                                                            -->
+<script>
+'use strict';
+
+/*    DATA                                                  */
+const QUALS=['Secondary (10th)','Senior Secondary (12th)','Diploma','Bachelor of Arts (BA)','Bachelor of Commerce (BCom)','Bachelor of Science (BSc)','Bachelor of Engineering (BE/BTech)','Bachelor of Computer Applications (BCA)','Bachelor of Business Administration (BBA)','Master of Arts (MA)','Master of Commerce (MCom)','Master of Science (MSc)','Master of Engineering (ME/MTech)','Master of Computer Applications (MCA)','Master of Business Administration (MBA)','Doctor of Philosophy (PhD)','Post-Doctoral','Other'];
+const SPECS=['Computer Science','Information Technology','Mechanical Engineering','Civil Engineering','Electrical Engineering','Electronics & Communication','Chemical Engineering','Biotechnology','Commerce & Accounting','Finance & Banking','Marketing Management','Human Resources','Operations Management','Data Science & Analytics','Artificial Intelligence','Cyber Security','Mathematics','Physics','Chemistry','Biology','Economics','English Literature','Psychology','Sociology','Law','Medical Sciences','Pharmacy','Architecture','Design','Other'];
+const FUNC_AREAS=['Software Development','Data Science & Analytics','DevOps & Cloud','IT Infrastructure','Product Management','Project Management','UI/UX Design','Quality Assurance','Sales & Business Development','Marketing & Digital Marketing','Human Resources','Finance & Accounts','Operations & Supply Chain','Legal & Compliance','Customer Support','Research & Development','Administration','Consulting','Healthcare & Medical','Education & Training','Manufacturing','Other'];
+const SECTORS=['IT & Software','Banking, Financial Services & Insurance','E-Commerce & Retail','Healthcare & Pharma','Manufacturing & Automotive','Consulting & Professional Services','Telecom','Media & Entertainment','Education & Ed-Tech','Real Estate & Construction','Energy & Utilities','FMCG & Consumer Goods','Logistics & Supply Chain','Aviation & Hospitality','Agriculture','Government & Public Sector','Non-Profit / NGO','Other'];
+
+/*    NAV CONFIG                                            */
+const PAGES=[
+  {id:0,label:'Dashboard',       icon:'fa-gauge-high'},
+  {id:1,label:'Personal Info',   icon:'fa-user'},
+  {id:2,label:'Academic',        icon:'fa-graduation-cap'},
+  {id:3,label:'Work Experience', icon:'fa-briefcase'},
+  {id:4,label:'Language Skills', icon:'fa-language'},
+  {id:5,label:'Bank Info',       icon:'fa-building-columns'},
+  {id:6,label:'Summary',         icon:'fa-clipboard-check'},
+];
+
+/*    STATE                                                 */
+let activePage=0;
+const acads=loadLS('nx_acads');
+const exps=loadLS('nx_exps');
+const langs=loadLS('nx_langs');
+let editAcadIdx=null,editExpIdx=null,editLangIdx=null;
+let pendDelType=null,pendDelIdx=null;
+const done=new Set(loadLS('nx_done'));
+let piSaved=!!loadLS('nx_pi').length; // personal info flag
+let bankSaved=!!loadLS('nx_bank').length;
+
+/*    INIT                                                  */
+document.addEventListener('DOMContentLoaded',()=>{
+  buildSidebar();
+  fillDropdowns();
+  restorePersonalInfo();
+  restoreBank();
+  renderAcadTable();
+  renderExpTable();
+  renderLangTable();
+  updateCompletion();
+  showPage(0);
+
+  // Salary live hints
+  liveSalHint('ex_sal','salHint');
+  liveSalHint('ex_var','varHint');
+
+  // Textarea char count
+  ge('ex_resp')&&ge('ex_resp').addEventListener('input',()=>{
+    ge('respLen').textContent=ge('ex_resp').value.length;
+  });
+
+  // Numeric-only
+  ['ex_sal','ex_var','bk_acc','bk_acc2','bk_aadhaar'].forEach(id=>{
+    ge(id)&&ge(id).addEventListener('input',()=>{ ge(id).value=ge(id).value.replace(/\D/g,''); });
+  });
+  ['aq_year'].forEach(id=>{
+    ge(id)&&ge(id).addEventListener('input',()=>{ ge(id).value=ge(id).value.replace(/\D/g,''); });
+  });
+
+  // IFSC / PAN uppercase
+  ['bk_ifsc','bk_pan'].forEach(id=>{
+    ge(id)&&ge(id).addEventListener('input',()=>{ ge(id).value=ge(id).value.toUpperCase(); });
+  });
+
+  // Auto-clear errors
+  document.querySelectorAll('.fi,.fsel').forEach(el=>{
+    el.addEventListener('input',()=>clearErrById('e_'+el.id));
+    el.addEventListener('change',()=>clearErrById('e_'+el.id));
+  });
+
+  // Mobile
+  const mob=document.getElementById('mobToggle');
+  const sbBack=document.getElementById('sbBackdrop');
+  if(mob){
+    mob.style.display='flex';
+    mob.addEventListener('click',()=>{ ge('sidebar').classList.toggle('mob-open'); sbBack.style.display=ge('sidebar').classList.contains('mob-open')?'block':'none'; });
+    sbBack.addEventListener('click',()=>{ ge('sidebar').classList.remove('mob-open'); sbBack.style.display='none'; });
+  }
+
+  // Sidebar toggle
+  ge('sbToggle').addEventListener('click',()=>{
+    ge('sidebar').classList.toggle('collapsed');
+  });
+});
+
+/*    SIDEBAR                                               */
+function buildSidebar(){
+  const nav=ge('sbNav');
+  nav.innerHTML=PAGES.map(p=>`
+    <div class="sb-item" id="sbi-${p.id}" onclick="showPage(${p.id})">
+      <div class="sb-icon"><i class="fa-solid ${p.icon}"></i></div>
+      <span class="sb-label">${p.label}</span>
+      <div class="sb-check" id="sbck-${p.id}"><i class="fa-solid fa-check"></i></div>
+    </div>
+  `).join('');
+}
+
+function updateSidebar(){
+  PAGES.forEach(p=>{
+    const item=ge('sbi-'+p.id);
+    const chk=ge('sbck-'+p.id);
+    if(!item)return;
+    item.classList.toggle('active',p.id===activePage);
+    const isDone=p.id===0||(p.id===1&&piSaved)||(p.id===2&&acads.length>0)||(p.id===3&&exps.length>0)||(p.id===4&&langs.length>0)||(p.id===5&&bankSaved);
+    if(chk)chk.classList.toggle('show',isDone);
+  });
+}
+
+/*    PAGE NAVIGATION                                       */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=ge('pg-'+id);
+  if(pg)pg.classList.add('active');
+  activePage=id;
+  updateSidebar();
+  updateCompletion();
+  if(id===6)buildSummary();
+  if(id===0)updateDashboard();
+  window.scrollTo({top:0,behavior:'smooth'});
+  ge('mainArea').scrollTo({top:0,behavior:'smooth'});
+}
+function goPage(id){showPage(id);}
+
+/*    DROPDOWNS                                             */
+function fillDropdowns(){
+  fillSel('aq_qual',QUALS);
+  fillSel('aq_spec',SPECS);
+  fillSel('ex_area',FUNC_AREAS);
+  fillSel('ex_sector',SECTORS);
+}
+function fillSel(id,opts){
+  const sel=ge(id); if(!sel)return;
+  const first=sel.options[0];
+  sel.innerHTML=''; sel.appendChild(first);
+  opts.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; sel.appendChild(op); });
+}
+
+/*    VALIDATION HELPERS                                   */
+function gv(id){return(ge(id)?.value||'').trim();}
+function showErr(id,msg){
+  const em=ge('e_'+id); if(em)em.textContent=msg;
+  const el=ge(id); if(el){el.classList.add('err');el.classList.remove('ok');}
+}
+function clearErrById(eid){
+  const em=ge(eid); if(em)em.textContent='';
+  const inputId=eid.replace(/^e_/,'');
+  const el=ge(inputId); if(el){el.classList.remove('err'); if(el.value.trim())el.classList.add('ok');}
+}
+function clearAllErr(prefix){
+  document.querySelectorAll(`[id^="e_${prefix}"]`).forEach(em=>{
+    em.textContent='';
+    const el=ge(em.id.replace(/^e_/,''));
+    if(el){el.classList.remove('err','ok');}
+  });
+}
+
+/*    PERSONAL INFO                                         */
+function savePI(){
+  clearAllErr('pi');
+  let ok=true;
+  const reqs=[['pi_title','Title'],['pi_first','First Name'],['pi_last','Last Name'],['pi_dob','Date of Birth'],['pi_gender','Gender'],['pi_email','Personal Email'],['pi_phone','Mobile Number'],['pi_nation','Nationality'],['pi_qual','Qualification']];
+  reqs.forEach(([id,lbl])=>{if(!gv(id)){showErr(id,`${lbl} is required.`);ok=false;}});
+  if(gv('pi_email')&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gv('pi_email'))){showErr('pi_email','Enter a valid email.');ok=false;}
+  if(gv('pi_phone')&&!/^[+\d\s\-().]{7,15}$/.test(gv('pi_phone'))){showErr('pi_phone','Enter a valid phone number.');ok=false;}
+  if(!ok){toast('Please fix the errors.','error');return;}
+  const data={title:gv('pi_title'),first:gv('pi_first'),mid:gv('pi_mid'),last:gv('pi_last'),dob:gv('pi_dob'),gender:gv('pi_gender'),email:gv('pi_email'),phone:gv('pi_phone'),nation:gv('pi_nation'),qual:gv('pi_qual'),blood:gv('pi_blood'),aka:gv('pi_aka')};
+  saveLS('nx_pi',[data]);
+  piSaved=true;
+  updateSidebar();updateCompletion();
+  updateHeaderName(data.first,data.last,data.email);
+  toast('Personal info saved!','success');
+}
+function resetPI(){clearAllErr('pi');['pi_title','pi_first','pi_mid','pi_last','pi_dob','pi_gender','pi_email','pi_phone','pi_nation','pi_qual','pi_blood','pi_aka'].forEach(id=>{const el=ge(id);if(el)el.value='';});}
+function restorePersonalInfo(){
+  const d=loadLS('nx_pi')[0]; if(!d)return;
+  Object.entries(d).forEach(([k,v])=>{const el=ge('pi_'+k);if(el)el.value=v;});
+  piSaved=true;
+  updateHeaderName(d.first,d.last,d.email);
+}
+function updateHeaderName(first,last,email){
+  const n=[first,last].filter(Boolean).join(' ')||'Employee';
+  ge('hdrName').textContent=n;
+  const init=(first?.[0]||'')+(last?.[0]||'') || 'JD';
+  ge('hdrAvatar').textContent=init.toUpperCase();
+  ge('dashProfileName').textContent=n;
+  ge('dashProfileEmail').textContent=email||'--';
+  ge('dashAvatarCircle').textContent=init.toUpperCase();
+}
+
+/*    ACADEMIC                                              */
+function validateAcad(){
+  clearAllErr('aq');let ok=true;
+  const reqs=[['aq_qual','Qualification'],['aq_spec','Specialization'],['aq_univ','University'],['aq_inst','Institute'],['aq_loc','Location'],['aq_med','Medium'],['aq_ctype','Course Type'],['aq_appr','Appraisal'],['aq_score','Score'],['aq_roll','Roll Number']];
+  reqs.forEach(([id,lbl])=>{if(!gv(id)){showErr(id,`${lbl} is required.`);ok=false;}});
+  const yr=gv('aq_year');
+  if(!yr){showErr('aq_year','Year is required.');ok=false;}
+  else if(!/^\d{4}$/.test(yr)){showErr('aq_year','Enter 4-digit year.');ok=false;}
+  else{const y=+yr,now=new Date().getFullYear();if(y<1950||y>now+1){showErr('aq_year',`Year must be 1950-${now+1}.`);ok=false;}}
+  return ok;
+}
+function getAcadData(){return{qual:gv('aq_qual'),spec:gv('aq_spec'),univ:gv('aq_univ'),inst:gv('aq_inst'),loc:gv('aq_loc'),med:gv('aq_med'),ctype:gv('aq_ctype'),year:gv('aq_year'),appr:gv('aq_appr'),score:gv('aq_score'),roll:gv('aq_roll')};}
+function saveAcad(){
+  if(!validateAcad())return;
+  acads.push(getAcadData()); saveLS('nx_acads',acads);
+  renderAcadTable(); resetAcad(); updateCompletion();
+  ge('acadForm').style.display='none'; ge('editAcadBtn').style.display='flex';
+  toast('Academic record saved!','success');
+}
+function saveAcadNext(){
+  if(!validateAcad())return;
+  acads.push(getAcadData()); saveLS('nx_acads',acads);
+  renderAcadTable(); resetAcad(); updateCompletion();
+  toast('Saved! Moving to Work Experience...','success');
+  setTimeout(()=>showPage(3),700);
+}
+function resetAcad(){['aq_qual','aq_spec','aq_univ','aq_inst','aq_loc','aq_med','aq_ctype','aq_year','aq_appr','aq_score','aq_roll'].forEach(id=>{const el=ge(id);if(el)el.value='';});clearAllErr('aq');}
+function toggleAcadForm(){const f=ge('acadForm');f.style.display=f.style.display==='none'?'block':'none';}
+function showAcadForm(){ge('acadForm').style.display='block'; ge('acadForm').scrollIntoView({behavior:'smooth',block:'start'});}
+
+function renderAcadTable(){
+  const panel=ge('acadPanel'),body=ge('acadTbody'),badge=ge('acadBadge');
+  if(!panel)return;
+  if(acads.length===0){panel.style.display='none';ge('acadForm').style.display='block';ge('editAcadBtn').style.display='none';return;}
+  panel.style.display='block';badge.textContent=acads.length;
+  body.innerHTML=acads.map((r,i)=>`
+    <tr>
+      <td><span class="rnum">${i+1}</span></td>
+      <td title="${esc(r.qual)}">${clip(r.qual,20)}</td>
+      <td title="${esc(r.spec)}">${clip(r.spec,18)}</td>
+      <td title="${esc(r.univ)}">${clip(r.univ,20)}</td>
+      <td title="${esc(r.inst)}">${clip(r.inst,18)}</td>
+      <td>${esc(r.year)}</td>
+      <td>${esc(r.score)}</td>
+      <td>${clip(r.ctype,14)}</td>
+      <td><div class="tactions"><button class="tbtn tbtn-edit" onclick="openAcadEdit(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button><button class="tbtn tbtn-del" onclick="confirmDel('acad',${i})" title="Delete"><i class="fa-solid fa-trash"></i></button></div></td>
+    </tr>`).join('');
+}
+
+function openAcadEdit(idx){
+  editAcadIdx=idx; const r=acads[idx];
+  ge('acadModalBody').innerHTML=`
+    <div class="mrow"><div class="mfield"><label class="fl">Qualification</label><select class="fsel" id="m_aq_qual" style="width:100%;border:none;border-bottom:1.5px solid var(--border2);border-radius:0;background:transparent;padding:.3rem 1.4rem .42rem 0;font-family:inherit;font-size:.875rem;appearance:none">${QUALS.map(q=>`<option ${r.qual===q?'selected':''}>${esc(q)}</option>`).join('')}</select></div><div class="mfield"><label class="fl">Specialization</label><select class="fsel" id="m_aq_spec" style="width:100%;border:none;border-bottom:1.5px solid var(--border2);border-radius:0;background:transparent;padding:.3rem 1.4rem .42rem 0;font-family:inherit;font-size:.875rem;appearance:none">${SPECS.map(s=>`<option ${r.spec===s?'selected':''}>${esc(s)}</option>`).join('')}</select></div></div>
+    <div class="mrow"><div class="mfield"><label class="fl">University</label><input class="fi" id="m_aq_univ" value="${esc(r.univ)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">Institute</label><input class="fi" id="m_aq_inst" value="${esc(r.inst)}" style="border-bottom:1.5px solid var(--border2)"/></div></div>
+    <div class="mrow"><div class="mfield"><label class="fl">Location</label><input class="fi" id="m_aq_loc" value="${esc(r.loc)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">Year</label><input class="fi" id="m_aq_year" value="${esc(r.year)}" maxlength="4" style="border-bottom:1.5px solid var(--border2)"/></div></div>
+    <div class="mrow"><div class="mfield"><label class="fl">Score</label><input class="fi" id="m_aq_score" value="${esc(r.score)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">Roll Number</label><input class="fi" id="m_aq_roll" value="${esc(r.roll)}" style="border-bottom:1.5px solid var(--border2)"/></div></div>`;
+  openModal('acadModal');
+}
+function updateAcad(){
+  const r=acads[editAcadIdx];
+  r.qual=gv('m_aq_qual'); r.spec=gv('m_aq_spec'); r.univ=gv('m_aq_univ');
+  r.inst=gv('m_aq_inst'); r.loc=gv('m_aq_loc'); r.year=gv('m_aq_year');
+  r.score=gv('m_aq_score'); r.roll=gv('m_aq_roll');
+  saveLS('nx_acads',acads); renderAcadTable(); closeModal('acadModal');
+  toast('Academic record updated!','success');
+}
+
+/*    WORK EXPERIENCE                                       */
+function validateExp(){
+  clearAllErr('ex');let ok=true;
+  const reqs=[['ex_org','Organization'],['ex_loc','Location'],['ex_area','Functional Area'],['ex_desig','Designation'],['ex_type','Experience Type'],['ex_from','From Date']];
+  reqs.forEach(([id,lbl])=>{if(!gv(id)){showErr(id,`${lbl} is required.`);ok=false;}});
+  const sal=gv('ex_sal');
+  if(!sal){showErr('ex_sal','Salary is required.');ok=false;}
+  else if(!/^\d+$/.test(sal)){showErr('ex_sal','Salary must be numeric.');ok=false;}
+  else if(+sal<1000){showErr('ex_sal','Enter annual CTC in   (minimum  1,000).');ok=false;}
+  const vp=gv('ex_var');
+  if(vp&&!/^\d+$/.test(vp)){showErr('ex_var','Variable pay must be numeric.');ok=false;}
+  const from=gv('ex_from'),to=gv('ex_to'),curr=ge('ex_curr')?.checked;
+  if(from&&to&&!curr&&new Date(to)<new Date(from)){showErr('ex_to','To date cannot be before From date.');ok=false;}
+  return ok;
+}
+function getExpData(){
+  const curr=ge('ex_curr')?.checked||false;
+  return{org:gv('ex_org'),loc:gv('ex_loc'),area:gv('ex_area'),desig:gv('ex_desig'),type:gv('ex_type'),sector:gv('ex_sector'),from:gv('ex_from'),to:curr?'':gv('ex_to'),current:curr,notice:gv('ex_notice'),sal:gv('ex_sal'),var:gv('ex_var'),resp:gv('ex_resp')};
+}
+function saveExp(){
+  if(!validateExp())return;
+  exps.push(getExpData()); saveLS('nx_exps',exps);
+  renderExpTable(); resetExp(); updateCompletion();
+  ge('expFormCard').style.display='none'; ge('editExpBtn').style.display='flex';
+  toast('Work experience saved!','success');
+}
+function resetExp(){['ex_org','ex_loc','ex_area','ex_desig','ex_type','ex_sector','ex_from','ex_to','ex_notice','ex_sal','ex_var','ex_resp'].forEach(id=>{const el=ge(id);if(el)el.value='';});
+  const c=ge('ex_curr'); if(c){c.checked=false;toggleCurrJob();}
+  ge('salHint').textContent=''; ge('varHint').textContent='';
+  ge('respLen').textContent='0'; clearAllErr('ex');
+}
+function toggleCurrJob(){const c=ge('ex_curr')?.checked;const to=ge('ex_to');if(to){to.disabled=c;if(c)to.value='';}}
+function toggleExpForm(){const f=ge('expFormCard');f.style.display=f.style.display==='none'?'block':'none';}
+function showExpForm(){ge('expFormCard').style.display='block'; ge('expFormCard').scrollIntoView({behavior:'smooth',block:'start'});}
+
+function renderExpTable(){
+  const panel=ge('expPanel'),body=ge('expTbody'),badge=ge('expBadge');
+  if(!panel)return;
+  if(exps.length===0){panel.style.display='none';ge('expFormCard').style.display='block';ge('editExpBtn').style.display='none';return;}
+  panel.style.display='block'; badge.textContent=exps.length;
+  body.innerHTML=exps.map((r,i)=>`
+    <tr>
+      <td><span class="rnum">${i+1}</span></td>
+      <td title="${esc(r.org)}">${clip(r.org,20)}</td>
+      <td title="${esc(r.loc)}">${clip(r.loc,14)}</td>
+      <td title="${esc(r.area)}">${clip(r.area,18)}</td>
+      <td title="${esc(r.desig)}">${clip(r.desig,18)}</td>
+      <td>${clip(r.type,18)}</td>
+      <td>${calcDur(r.from,r.to,r.current)}</td>
+      <td>${fmtSalShort(r.sal)}</td>
+      <td><div class="tactions"><button class="tbtn tbtn-edit" onclick="openExpEdit(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button><button class="tbtn tbtn-del" onclick="confirmDel('exp',${i})" title="Delete"><i class="fa-solid fa-trash"></i></button></div></td>
+    </tr>`).join('');
+  updateExpStats();
+}
+function updateExpStats(){
+  let months=0,totalSal=0,cnt=0;
+  exps.forEach(r=>{
+    if(r.from){const s=new Date(r.from+'-01'),e=r.current||!r.to?new Date():new Date(r.to+'-01');months+=Math.max(0,(e.getFullYear()-s.getFullYear())*12+(e.getMonth()-s.getMonth()));}
+    if(r.sal&&!isNaN(+r.sal)){totalSal+=+r.sal;cnt++;}
+  });
+  const y=Math.floor(months/12),m=months%12;
+  ge('totalExp').textContent=y>0?`${y}y ${m}m`:`${m}m`;
+  ge('totalOrgs').textContent=exps.length;
+  ge('avgCTC').textContent=cnt>0?fmtSalShort(String(Math.round(totalSal/cnt))):'--';
+}
+
+function openExpEdit(idx){
+  editExpIdx=idx; const r=exps[idx];
+  ge('expModalBody').innerHTML=`
+    <div class="mrow"><div class="mfield"><label class="fl">Organization</label><input class="fi" id="m_ex_org" value="${esc(r.org)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">Location</label><input class="fi" id="m_ex_loc" value="${esc(r.loc)}" style="border-bottom:1.5px solid var(--border2)"/></div></div>
+    <div class="mrow"><div class="mfield"><label class="fl">Designation</label><input class="fi" id="m_ex_desig" value="${esc(r.desig)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">From</label><input type="month" class="fi" id="m_ex_from" value="${esc(r.from)}" style="border-bottom:1.5px solid var(--border2)"/></div></div>
+    <div class="mrow"><div class="mfield"><label class="fl">To</label><input type="month" class="fi" id="m_ex_to" value="${esc(r.to)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">Gross Salary (  p.a.)</label><input class="fi" id="m_ex_sal" value="${esc(r.sal)}" style="border-bottom:1.5px solid var(--border2)"/></div></div>
+    <div class="mfield"><label class="fl">Variable Pay (  p.a.)</label><input class="fi" id="m_ex_var" value="${esc(r.var)}" style="border-bottom:1.5px solid var(--border2)"/></div>`;
+  openModal('expModal');
+}
+function updateExp(){
+  const r=exps[editExpIdx];
+  r.org=gv('m_ex_org'); r.loc=gv('m_ex_loc'); r.desig=gv('m_ex_desig');
+  r.from=gv('m_ex_from'); r.to=gv('m_ex_to'); r.sal=gv('m_ex_sal'); r.var=gv('m_ex_var');
+  saveLS('nx_exps',exps); renderExpTable(); closeModal('expModal');
+  toast('Experience updated!','success');
+}
+
+/*    LANGUAGES                                             */
+function saveLang(){
+  clearAllErr('lg'); let ok=true;
+  if(!gv('lg_name')){showErr('lg_name','Language name is required.');ok=false;}
+  if(!gv('lg_prof')){showErr('lg_prof','Proficiency is required.');ok=false;}
+  if(!ok)return;
+  langs.push({name:gv('lg_name'),prof:gv('lg_prof'),read:ge('lg_read')?.checked||false,write:ge('lg_write')?.checked||false,speak:ge('lg_speak')?.checked||false});
+  saveLS('nx_langs',langs); renderLangTable(); resetLang(); updateCompletion();
+  toast('Language saved!','success');
+}
+function resetLang(){['lg_name','lg_prof'].forEach(id=>{const el=ge(id);if(el)el.value='';});['lg_read','lg_write','lg_speak'].forEach(id=>{const el=ge(id);if(el)el.checked=false;});clearAllErr('lg');}
+function renderLangTable(){
+  const panel=ge('langPanel'),body=ge('langTbody'),badge=ge('langBadge');
+  if(!panel)return;
+  if(langs.length===0){panel.style.display='none';return;}
+  panel.style.display='block'; badge.textContent=langs.length;
+  const tick=v=>`<i class="fa-solid ${v?'fa-check':'fa-minus'}" style="color:${v?'var(--success)':'var(--ink4)'}"></i>`;
+  body.innerHTML=langs.map((r,i)=>`
+    <tr>
+      <td><span class="rnum">${i+1}</span></td>
+      <td><strong>${esc(r.name)}</strong></td>
+      <td>${esc(r.prof)}</td>
+      <td style="text-align:center">${tick(r.read)}</td>
+      <td style="text-align:center">${tick(r.write)}</td>
+      <td style="text-align:center">${tick(r.speak)}</td>
+      <td><div class="tactions"><button class="tbtn tbtn-edit" onclick="openLangEdit(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button><button class="tbtn tbtn-del" onclick="confirmDel('lang',${i})" title="Delete"><i class="fa-solid fa-trash"></i></button></div></td>
+    </tr>`).join('');
+}
+function openLangEdit(idx){
+  editLangIdx=idx; const r=langs[idx];
+  ge('langModalBody').innerHTML=`
+    <div class="mrow"><div class="mfield"><label class="fl">Language</label><input class="fi" id="m_lg_name" value="${esc(r.name)}" style="border-bottom:1.5px solid var(--border2)"/></div><div class="mfield"><label class="fl">Proficiency</label><select class="fsel" id="m_lg_prof" style="width:100%;border:none;border-bottom:1.5px solid var(--border2);border-radius:0;background:transparent;padding:.3rem 1.4rem .42rem 0;font-family:inherit;font-size:.875rem;appearance:none"><option>Beginner</option><option>Elementary</option><option>Intermediate</option><option>Upper Intermediate</option><option>Advanced</option><option>Native / Fluent</option></select></div></div>
+    <div style="display:flex;gap:1.5rem;margin-top:.5rem">
+      <label class="cbx-wrap"><input type="checkbox" id="m_lg_read" ${r.read?'checked':''}/><span class="cbx-box"></span><span class="cbx-lbl">Read</span></label>
+      <label class="cbx-wrap"><input type="checkbox" id="m_lg_write" ${r.write?'checked':''}/><span class="cbx-box"></span><span class="cbx-lbl">Write</span></label>
+      <label class="cbx-wrap"><input type="checkbox" id="m_lg_speak" ${r.speak?'checked':''}/><span class="cbx-box"></span><span class="cbx-lbl">Speak</span></label>
+    </div>`;
+  setTimeout(()=>{if(ge('m_lg_prof'))ge('m_lg_prof').value=r.prof;},30);
+  openModal('langModal');
+}
+function updateLang(){
+  const r=langs[editLangIdx];
+  r.name=gv('m_lg_name'); r.prof=gv('m_lg_prof');
+  r.read=ge('m_lg_read')?.checked||false; r.write=ge('m_lg_write')?.checked||false; r.speak=ge('m_lg_speak')?.checked||false;
+  saveLS('nx_langs',langs); renderLangTable(); closeModal('langModal');
+  toast('Language updated!','success');
+}
+
+/*    BANK INFO                                             */
+function saveBank(){
+  clearAllErr('bk'); let ok=true;
+  if(!gv('bk_acc')){showErr('bk_acc','Account number is required.');ok=false;}
+  if(!gv('bk_acc2')){showErr('bk_acc2','Confirm account number.');ok=false;}
+  else if(gv('bk_acc')!==gv('bk_acc2')){showErr('bk_acc2','Account numbers do not match.');ok=false;}
+  const ifsc=gv('bk_ifsc');
+  if(!ifsc){showErr('bk_ifsc','IFSC code is required.');ok=false;}
+  else if(!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc.toUpperCase())){showErr('bk_ifsc','Invalid IFSC (e.g. SBIN0001234).');ok=false;}
+  if(!gv('bk_name')){showErr('bk_name','Bank name is required.');ok=false;}
+  const aa=gv('bk_aadhaar');
+  if(!aa){showErr('bk_aadhaar','Aadhaar is required.');ok=false;}
+  else if(!/^\d{12}$/.test(aa)){showErr('bk_aadhaar','Enter valid 12-digit Aadhaar.');ok=false;}
+  const pan=gv('bk_pan');
+  if(!pan){showErr('bk_pan','PAN is required.');ok=false;}
+  else if(!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan.toUpperCase())){showErr('bk_pan','Invalid PAN (e.g. ABCDE1234F).');ok=false;}
+  if(!ok){toast('Please fix errors.','error');return;}
+  saveLS('nx_bank',[{acc:gv('bk_acc'),ifsc:gv('bk_ifsc').toUpperCase(),name:gv('bk_name'),branch:gv('bk_branch'),type:gv('bk_type'),aadhaar:gv('bk_aadhaar'),pan:gv('bk_pan').toUpperCase()}]);
+  bankSaved=true; updateSidebar(); updateCompletion();
+  toast('Bank information saved!','success');
+}
+function resetBank(){['bk_acc','bk_acc2','bk_ifsc','bk_name','bk_branch','bk_aadhaar','bk_pan'].forEach(id=>{const el=ge(id);if(el)el.value='';});clearAllErr('bk');}
+function restoreBank(){
+  const d=loadLS('nx_bank')[0]; if(!d)return;
+  ge('bk_acc').value=d.acc||''; ge('bk_acc2').value=d.acc||'';
+  ge('bk_ifsc').value=d.ifsc||''; ge('bk_name').value=d.name||'';
+  ge('bk_branch').value=d.branch||''; ge('bk_type').value=d.type||'Savings';
+  ge('bk_aadhaar').value=d.aadhaar||''; ge('bk_pan').value=d.pan||'';
+  bankSaved=true;
+}
+
+/*    DELETE                                                */
+function confirmDel(type,idx){
+  pendDelType=type; pendDelIdx=idx;
+  const labels={acad:acads[idx]?.qual, exp:exps[idx]?.org, lang:langs[idx]?.name};
+  ge('delMsg').innerHTML=`Delete <strong>${esc(labels[type]||'this record')}</strong>? This cannot be undone.`;
+  ge('delConfirm').onclick=execDel;
+  openModal('delModal');
+}
+function execDel(){
+  if(pendDelType==='acad'){acads.splice(pendDelIdx,1);saveLS('nx_acads',acads);renderAcadTable();}
+  else if(pendDelType==='exp'){exps.splice(pendDelIdx,1);saveLS('nx_exps',exps);renderExpTable();}
+  else if(pendDelType==='lang'){langs.splice(pendDelIdx,1);saveLS('nx_langs',langs);renderLangTable();}
+  updateCompletion(); closeModal('delModal');
+  toast('Record deleted.','warn');
+}
+
+/*    MODALS                                                */
+function openModal(id){const el=ge(id);if(el)el.classList.add('open');}
+function closeModal(id){const el=ge(id);if(el)el.classList.remove('open');}
+
+/*    SUMMARY                                               */
+function buildSummary(){
+  const pi=loadLS('nx_pi')[0]||{};
+  const bk=loadLS('nx_bank')[0]||{};
+  const row=(k,v)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem"><span style="font-size:.73rem;color:var(--ink3);font-weight:700;min-width:130px;text-transform:uppercase;letter-spacing:.04em">${k}</span><span style="font-size:.78rem;color:var(--ink2)">${v||'--'}</span></div>`;
+  const sec=(title,icon,color,content,step)=>`
+    <div class="fcard" style="margin-bottom:1rem">
+      <div class="fcard-head" style="justify-content:space-between">
+        <span class="fcard-label"><i class="fa-solid ${icon}" style="color:${color}"></i> ${title}</span>
+        <button class="btn btn-ghost btn-sm" onclick="showPage(${step})"><i class="fa-solid fa-pen"></i> Edit</button>
+      </div>
+      <div style="padding:1rem 1.25rem">${content}</div>
+    </div>`;
+
+  const piContent=[
+    row('Full Name',[pi.title,pi.first,pi.mid,pi.last].filter(Boolean).join(' ')),
+    row('Date of Birth',pi.dob), row('Gender',pi.gender),
+    row('Email',pi.email), row('Mobile',pi.phone),
+    row('Nationality',pi.nation), row('Qualification',pi.qual),
+  ].join('');
+
+  const acadContent=acads.length===0?'<em style="color:var(--ink4);font-size:.8rem">No records added.</em>':acads.map(r=>`<div style="padding:.55rem 0;border-bottom:1px solid var(--border)">${row('Degree',r.qual+' -- '+r.spec)}${row('Institute',r.inst+', '+r.loc)}${row('Year / Score',r.year+' | '+r.score)}</div>`).join('');
+
+  const expContent=exps.length===0?'<em style="color:var(--ink4);font-size:.8rem">No records added.</em>':exps.map(r=>`<div style="padding:.55rem 0;border-bottom:1px solid var(--border)">${row('Organization',r.org+' -- '+r.desig)}${row('Duration',calcDur(r.from,r.to,r.current)+(r.current?' (Current)':''))}${row('Gross CTC',fmtSalShort(r.sal))}</div>`).join('');
+
+  const langContent=langs.length===0?'<em style="color:var(--ink4);font-size:.8rem">No languages added.</em>':langs.map(r=>`${row(r.name,r.prof+' | '+[r.read&&'Read',r.write&&'Write',r.speak&&'Speak'].filter(Boolean).join(', '))}`).join('');
+
+  const bkContent=bk.acc?[row('Bank',bk.name+' ('+bk.type+')'),row('Account','    '+bk.acc.slice(-4)),row('IFSC',bk.ifsc),row('PAN',bk.pan)].join(''):'<em style="color:var(--ink4);font-size:.8rem">Not filled.</em>';
+
+  ge('summaryContent').innerHTML=
+    sec('Personal Information','fa-user','var(--brand)',piContent,1)+
+    sec('Academic Qualification','fa-graduation-cap','var(--teal)',acadContent,2)+
+    sec('Work Experience','fa-briefcase','var(--emerald)',expContent,3)+
+    sec('Language Skills','fa-language','var(--violet)',langContent,4)+
+    sec('Bank Information','fa-building-columns','var(--amber)',bkContent,5);
+}
+
+/*    SUBMIT                                                */
+function submitProfile(){
+  if(acads.length===0&&exps.length===0&&!piSaved){toast('Please fill in at least some sections first.','error');return;}
+  ge('sAcad').textContent=acads.length;
+  ge('sExp').textContent=exps.length;
+  ge('sLang').textContent=langs.length;
+  ge('success-ov').style.display='flex';
+}
+
+/*    COMPLETION                                            */
+function updateCompletion(){
+  const sections=[piSaved,acads.length>0,exps.length>0,langs.length>0,bankSaved];
+  const count=sections.filter(Boolean).length;
+  const pct=Math.round((count/sections.length)*100);
+  ge('hdrBar').style.width=pct+'%';
+  ge('pctLabel').textContent=pct+'%';
+  ge('dashPct').textContent=pct+'%';
+  ge('dashAcadCnt').textContent=acads.length;
+  ge('dashExpCnt').textContent=exps.length;
+  ge('dashLangCnt').textContent=langs.length;
+  // Ring (circumference = 2  22   138.2)
+  const fill=(pct/100)*138.2;
+  const rf=ge('ringFill'); if(rf)rf.setAttribute('stroke-dasharray',`${fill} 138.2`);
+  const rl=ge('ringLabel'); if(rl)rl.textContent=pct+'%';
+  updateSidebar();
+  updateDashboardChecklist();
+}
+
+function updateDashboard(){updateCompletion();}
+function updateDashboardChecklist(){
+  const cl=ge('dashChecklist'); if(!cl)return;
+  const items=[
+    {label:'Personal Information',done:piSaved,step:1},
+    {label:'Academic Qualification',done:acads.length>0,step:2},
+    {label:'Work Experience',done:exps.length>0,step:3},
+    {label:'Language Skills',done:langs.length>0,step:4},
+    {label:'Bank Information',done:bankSaved,step:5},
+  ];
+  cl.innerHTML=items.map(it=>`
+    <div class="dcl-item ${it.done?'done':''}" onclick="showPage(${it.step})">
+      <i class="fa-solid ${it.done?'fa-circle-check':'fa-circle'} dcl-icon"></i>
+      <span>${it.label}</span>
+    </div>`).join('');
+}
+
+/*    SALARY HINT                                           */
+function liveSalHint(inputId,hintId){
+  const el=ge(inputId),hint=ge(hintId);
+  if(!el||!hint)return;
+  el.addEventListener('input',()=>{
+    const v=+el.value;
+    hint.textContent=(!isNaN(v)&&v>0)?'  '+fmtSalWords(v):'';
+  });
+}
+function fmtSalWords(n){
+  if(n>=10000000)return` ${(n/10000000).toFixed(1)} Cr`;
+  if(n>=100000)return` ${(n/100000).toFixed(1)} Lakh`;
+  if(n>=1000)return` ${(n/1000).toFixed(1)}K`;
+  return` ${n}`;
+}
+function fmtSalShort(s){const n=+s;return(!s||isNaN(n)||n===0)?'--':fmtSalWords(n);}
+
+/*    TOAST                                                 */
+const TICONS={success:'fa-circle-check',error:'fa-circle-xmark',warn:'fa-triangle-exclamation',info:'fa-circle-info'};
+function toast(msg,type='info'){
+  const c=ge('toast-stack');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<i class="fa-solid ${TICONS[type]||TICONS.info} toast-icon"></i><span class="toast-msg">${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.animation='tOut .3s ease forwards';setTimeout(()=>t.remove(),300);},3500);
+}
+
+/*    UTILS                                                 */
+function ge(id){return document.getElementById(id);}
+function esc(s){if(!s&&s!==0)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function clip(s,n){if(!s)return'--';return s.length>n?s.slice(0,n)+'...':s;}
+function calcDur(from,to,current){
+  if(!from)return'--';
+  const s=new Date(from+'-01'),e=current||!to?new Date():new Date(to+'-01');
+  const m=Math.max(0,(e.getFullYear()-s.getFullYear())*12+(e.getMonth()-s.getMonth()));
+  const y=Math.floor(m/12),mo=m%12;
+  return[y>0&&y+'y',mo>0&&mo+'m'].filter(Boolean).join(' ')||'<1m';
+}
+function saveLS(key,data){try{localStorage.setItem(key,JSON.stringify(data));}catch(e){}}
+function loadLS(key){try{return JSON.parse(localStorage.getItem(key)||'[]');}catch{return[];}}
+</script>
+</body>
+</html>
